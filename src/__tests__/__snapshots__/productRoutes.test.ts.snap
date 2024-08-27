@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Product Routes should return a list of products and match snapshot 1`] = `
+[
+  {
+    "countInStock": 10,
+    "description": "Test product",
+    "name": "Product 1",
+    "price": 100,
+  },
+  {
+    "countInStock": 5,
+    "description": "Test product 2",
+    "name": "Product 2",
+    "price": 200,
+  },
+]
+`;

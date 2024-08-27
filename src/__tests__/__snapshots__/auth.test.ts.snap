@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`User Routes should register a new user and match snapshot 1`] = `
+{
+  "_id": "1",
+  "email": "john@example.com",
+  "name": "John Doe",
+  "token": "fakeToken",
+}
+`;
