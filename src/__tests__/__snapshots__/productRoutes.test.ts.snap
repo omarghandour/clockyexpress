@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Product Routes should create a new product with valid token 1`] = `""`;
+
+exports[`Product Routes should delete a Product by ID 1`] = `
+{
+  "message": "Product deleted successfully",
+}
+`;
+
+exports[`Product Routes should return a Product by ID 1`] = `
+{
+  "_id": "123abc",
+  "countInStock": 10,
+  "description": "Test product",
+  "name": "Product 1",
+  "price": 100,
+}
+`;
+
 exports[`Product Routes should return a list of products and match snapshot 1`] = `
 [
   {
