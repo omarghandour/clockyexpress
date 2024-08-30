@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Product from "../models/product";
+import Cart from "../models/Cart";
 // import Cart from "../models/Cart";
 
 const getProducts = async (req: Request, res: Response) => {
@@ -72,12 +73,60 @@ const updateProduct = async (req: Request, res: Response) => {
 
 // cart
 const cartProduct = async (req: Request, res: Response) => {
-  console.log(req.body);
-  res.status(200).json({ message: "Cart product endpoint" });
+  const { id } = req.params;
+  try {
+    // Find the cart for the user and populate the product details
+    const cart = await Cart.findOne({ user: id }).populate("products.product");
+
+    if (!cart) {
+      return res.status(404).json({ message: "No cart found for this user" });
+    }
+
+    // Return the populated products in the cart
+    res.status(200).json(cart.products);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to retrieve products in cart",
+      error: error.message,
+    });
+  }
 };
 
 const addToCart = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Add to cart endpoint" });
+  const { id } = req.params;
+  const { product, quantity } = req.body;
+  try {
+    // Find the user's cart
+    let cart = await Cart.findOne({ user: id });
+
+    if (cart) {
+      // Check if the product is already in the cart
+      const existingProduct = cart.products.find(
+        (p) => p.product.toString() === product
+      );
+
+      if (existingProduct) {
+        // Update the quantity if the product already exists
+        existingProduct.quantity += quantity;
+      } else {
+        // Add the new product to the cart
+        cart.products.push({ product, quantity });
+      }
+    } else {
+      // Create a new cart if the user doesn't have one
+      cart = new Cart({
+        user: id,
+        products: [{ product, quantity }],
+      });
+    }
+
+    const updatedCart = await cart.save();
+    res.status(201).json(updatedCart);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Failed to add to cart", error: error.message });
+  }
 };
 
 export {
