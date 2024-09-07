@@ -6,6 +6,7 @@ interface IProduct extends Document {
   price: number;
   description: string;
   countInStock: number;
+  img: string;
 }
 
 // Create the Product schema
@@ -15,6 +16,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     price: { type: Number, required: true, min: 0 },
     description: { type: String, required: true, trim: true },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
+    img: { type: String, required: true },
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt fields

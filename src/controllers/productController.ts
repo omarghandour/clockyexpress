@@ -27,17 +27,22 @@ const getProductById = async (req: Request, res: Response) => {
 
 const addProduct = async (req: Request, res: Response) => {
   try {
-    const { name, price, description, countInStock } = req.body;
+    const { name, price, description, countInStock, img } = req.body;
+    // console.log(req.body);
+
     const product = new Product({
       name,
       price,
       description,
       countInStock,
+      img,
     });
 
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({ message: "Failed to add product" });
   }
 };
@@ -56,12 +61,24 @@ const removeProduct = async (req: Request, res: Response) => {
 };
 
 const updateProduct = async (req: Request, res: Response) => {
+  const { name, price, description, countInStock, img } = req.body;
+
   try {
     const { PID } = req.params;
-    const updatedProduct = await Product.findByIdAndUpdate(PID, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedProduct = await Product.findByIdAndUpdate(
+      PID,
+      {
+        name,
+        price,
+        description,
+        countInStock,
+        img,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }

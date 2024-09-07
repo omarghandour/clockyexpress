@@ -35,12 +35,12 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.route("/").get(getProducts).post(authMiddleware, addProduct);
+router.route("/").get(getProducts).post(addProduct);
 router
   .route("/:PID")
   .get(getProductById)
-  .delete(authMiddleware, removeProduct)
-  .put(authMiddleware, updateProduct);
+  .delete(removeProduct)
+  .put(updateProduct);
 // cart
 router.route("/cart/:id").get(cartProduct).post(addToCart);
 export default router;
