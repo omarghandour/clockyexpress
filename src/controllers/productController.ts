@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Product from "../models/product";
 import Cart from "../models/Cart";
+import User from "../models/user";
+import Favorite from "../models/AddToFavorite";
 // import Cart from "../models/Cart";
 
 const getProducts = async (req: Request, res: Response) => {
@@ -146,6 +148,45 @@ const addToCart = async (req: Request, res: Response) => {
   }
 };
 
+// Favorites
+const AddtoFavorite = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { ProductId } = req.body;
+  try {
+    // find user by id
+    // const user = await User.findById(id);
+    // const product = Product.findById(ProductId);
+    const favorite = await Favorite.find({ user: id });
+    if (favorite) {
+      const favorite = new Favorite({
+        user: id,
+        Product: ProductId,
+      });
+
+      await favorite.save();
+    }
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "Failed to add to favorite" });
+  }
+};
+const RemoveFromFavorite = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { ProductId } = req.body;
+  try {
+    const favorite = await Favorite.findOneAndDelete({
+      user: id,
+      products: ProductId,
+    });
+    if (!favorite) {
+      return res.status(404).json({ message: "Favorite not found" });
+    }
+    res.status(200).json({ message: "Favorite deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete favorite" });
+  }
+};
 export {
   getProducts,
   addProduct,
@@ -154,4 +195,6 @@ export {
   updateProduct,
   cartProduct,
   addToCart,
+  AddtoFavorite,
+  RemoveFromFavorite,
 };
