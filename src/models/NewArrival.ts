@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 // Define the interface for the Product schema
-interface IProduct extends Document {
+interface INewArrival extends Document {
   name: string;
   price: number;
   before?: number;
@@ -11,7 +11,7 @@ interface IProduct extends Document {
 }
 
 // Create the Product schema
-const ProductSchema: Schema<IProduct> = new Schema(
+const NewArrivalSchema: Schema<INewArrival> = new Schema(
   {
     name: { type: String, required: true, trim: true },
     price: { type: Number, required: true, min: 0 },
@@ -26,9 +26,9 @@ const ProductSchema: Schema<IProduct> = new Schema(
 );
 
 // Export the Product model
-const Product: Model<IProduct> = mongoose.model<IProduct>(
-  "Product",
-  ProductSchema
+const NewArrival: Model<INewArrival> = mongoose.model<INewArrival>(
+  "NewArrival",
+  NewArrivalSchema
 );
 
-export default Product;
+export default NewArrival;

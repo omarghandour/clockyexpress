@@ -3,6 +3,7 @@ import Product from "../models/product";
 import Cart from "../models/Cart";
 import User from "../models/user";
 import Favorite from "../models/AddToFavorite";
+import NewArrival from "../models/NewArrival";
 // import Cart from "../models/Cart";
 
 const getProducts = async (req: Request, res: Response) => {
@@ -31,7 +32,13 @@ const addProduct = async (req: Request, res: Response) => {
   try {
     const { name, price, description, countInStock, img } = req.body;
     // console.log(req.body);
-
+    const newArrival = new NewArrival({
+      name,
+      price,
+      description,
+      countInStock,
+      img,
+    });
     const product = new Product({
       name,
       price,
@@ -41,7 +48,8 @@ const addProduct = async (req: Request, res: Response) => {
     });
 
     const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
+    const newArrivaled = await newArrival.save();
+    res.status(201).json({ products: createdProduct, new: newArrivaled });
   } catch (error) {
     console.log(error);
 
