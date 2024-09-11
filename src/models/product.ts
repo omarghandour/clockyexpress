@@ -7,6 +7,11 @@ interface IProduct extends Document {
   before?: number;
   description: string;
   countInStock: number;
+  gender: string;
+  caseColor: string;
+  dialColor: string;
+  movmentType: string;
+  attachment: mongoose.Schema.Types.ObjectId[];
   img: string;
 }
 
@@ -17,6 +22,16 @@ const ProductSchema: Schema<IProduct> = new Schema(
     price: { type: Number, required: true, min: 0 },
     before: { type: Number, min: 0 },
     description: { type: String, required: true, trim: true },
+    gender: { type: String, enum: ["men", "women", "unisex"] },
+    caseColor: { type: String, required: true },
+    dialColor: { type: String, required: true },
+    movmentType: { type: String, enum: ["automatic", "quartz"] },
+    attachment: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "File",
+      },
+    ],
     countInStock: { type: Number, required: true, default: 0, min: 0 },
     img: { type: String, required: true },
   },
