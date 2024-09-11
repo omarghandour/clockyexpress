@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 // Define the interface for the Cart schema
 interface ICartProduct {
-  product: mongoose.Types.ObjectId;
+  product: string;
   quantity: number;
 }
 

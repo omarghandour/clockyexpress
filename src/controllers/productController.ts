@@ -103,10 +103,13 @@ const cartProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     // Find the cart for the user and populate the product details
-    const cart = await Cart.findOne({ user: id }).populate("products.product");
+    let cart = await Cart.findOne({ user: id }).populate("products.product");
 
     if (!cart) {
-      return res.status(404).json({ message: "No cart found for this user" });
+      // make an empty cart
+      const newCart = new Cart({ user: id });
+      await newCart.save();
+      cart = newCart;
     }
 
     // Return the populated products in the cart
@@ -118,43 +121,70 @@ const cartProduct = async (req: Request, res: Response) => {
     });
   }
 };
-
+interface ICartProduct {
+  product: string;
+  quantity: number;
+}
 const addToCart = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { product, quantity } = req.body;
+  const { id } = req.params; // The user ID
+  const { products } = req.body; // Array of products with product ID and quantity
+
+  if (!Array.isArray(products)) {
+    return res.status(400).json({ message: "Invalid products format" });
+  }
+
   try {
     // Find the user's cart
     let cart = await Cart.findOne({ user: id });
 
-    if (cart) {
-      // Check if the product is already in the cart
-      const existingProduct = cart.products.find(
-        (p) => p.product.toString() === product
-      );
-
-      if (existingProduct) {
-        // Update the quantity if the product already exists
-        existingProduct.quantity += quantity;
-      } else {
-        // Add the new product to the cart
-        cart.products.push({ product, quantity });
-      }
-    } else {
-      // Create a new cart if the user doesn't have one
+    if (!cart) {
+      // If the cart doesn't exist, create a new cart for the user
       cart = new Cart({
         user: id,
-        products: [{ product, quantity }],
+        products: [],
       });
     }
 
-    const updatedCart = await cart.save();
-    res.status(201).json(updatedCart);
+    // Update the cart's products
+    const updatedProducts = products.reduce(
+      (
+        acc: ICartProduct[],
+        { _id, quantity }: { _id: string; quantity: number }
+      ) => {
+        if (quantity > 0) {
+          // Check if the product already exists in the cart
+          const existingProductIndex = acc.findIndex(
+            (p) => p.product.toString() === _id
+          );
+          if (existingProductIndex > -1) {
+            // Update the quantity if the product exists
+            acc[existingProductIndex].quantity = quantity;
+          } else {
+            // Add new product to the cart
+            acc.push({ product: _id, quantity });
+          }
+        }
+        return acc;
+      },
+      []
+    );
+
+    // Remove products with quantity of 0
+    cart.products = updatedProducts;
+
+    // Save the updated cart
+    await cart.save();
+
+    res.status(200).json(cart);
   } catch (error: any) {
+    console.error(error);
     res
       .status(500)
-      .json({ message: "Failed to add to cart", error: error.message });
+      .json({ message: "Failed to update cart", error: error.message });
   }
 };
+
+export default addToCart;
 
 // Favorites
 const AddtoFavorite = async (req: Request, res: Response) => {

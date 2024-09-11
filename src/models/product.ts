@@ -23,8 +23,8 @@ const ProductSchema: Schema<IProduct> = new Schema(
     before: { type: Number, min: 0 },
     description: { type: String, required: true, trim: true },
     gender: { type: String, enum: ["men", "women", "unisex"] },
-    caseColor: { type: String, required: true },
-    dialColor: { type: String, required: true },
+    caseColor: { type: String },
+    dialColor: { type: String },
     movmentType: { type: String, enum: ["automatic", "quartz"] },
     attachment: [
       {

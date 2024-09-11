@@ -5,10 +5,19 @@ import productRoutes from "./routes/productRoutes";
 import userRoutes from "./routes/userRoutes";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import cors from "cors";
+
 dotenv.config();
 connectDB();
 
 const app = express();
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000", // Front-end URL
+    credentials: true, // Allow credentials like cookies and tokens
+  })
+);
+
 const swaggerDefinition = {
   info: {
     title: "E-commerce API",
@@ -29,12 +38,12 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Middleware to parse JSON
 app.use(express.json());
 // cors
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+//   res.header("Access-Control-Allow-Headers", "Content-Type");
+//   next();
+// });
 // app.get("/", (req, res) => {
 //   res.json("success").status(201);
 // });

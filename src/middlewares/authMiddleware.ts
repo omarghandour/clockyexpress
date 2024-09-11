@@ -21,13 +21,25 @@ const authMiddleware = async (
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET!);
       req.user = await User.findById((decoded as any).id).select("-password");
-      next();
+
+      // Check if the user is an admin
+      if (req.user && req.user.isAdmin) {
+        console.log("User is admin");
+
+        next();
+      } else {
+        res.status(403).json({ message: "Access denied. Admins only." });
+      }
     } catch (error) {
+      console.log(error);
+
       res.status(401).json({ message: "Not authorized, token failed" });
     }
   }
 
   if (!token) {
+    console.log("no token");
+
     res.status(401).json({ message: "Not authorized, no token" });
   }
 };
