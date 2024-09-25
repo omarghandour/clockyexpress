@@ -30,11 +30,25 @@ const getProductById = async (req: Request, res: Response) => {
 
 const addProduct = async (req: Request, res: Response) => {
   try {
-    const { name, price, description, countInStock, img } = req.body;
+    const {
+      name,
+      price,
+      description,
+      countInStock,
+      img,
+      before,
+      gender,
+      caseColor,
+      dialColor,
+    } = req.body;
     // console.log(req.body);
     const newArrival = new NewArrival({
       name,
       price,
+      before,
+      gender,
+      caseColor,
+      dialColor,
       description,
       countInStock,
       img,
@@ -42,6 +56,10 @@ const addProduct = async (req: Request, res: Response) => {
     const product = new Product({
       name,
       price,
+      before,
+      gender,
+      caseColor,
+      dialColor,
       description,
       countInStock,
       img,
@@ -187,7 +205,7 @@ const addToCart = async (req: Request, res: Response) => {
 export default addToCart;
 
 // Favorites
-const AddtoFavorite = async (req: Request, res: Response) => {
+const AddToFavorite = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { ProductId } = req.body;
   try {
@@ -233,6 +251,6 @@ export {
   updateProduct,
   cartProduct,
   addToCart,
-  AddtoFavorite,
+  AddToFavorite,
   RemoveFromFavorite,
 };
