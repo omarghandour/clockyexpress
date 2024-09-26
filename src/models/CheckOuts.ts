@@ -34,7 +34,7 @@ const CheckoutSchema: Schema = new Schema(
     products: [
       {
         productId: {
-          type: mongoose.Schema.Types.ObjectId,
+          type: String,
           ref: "Product",
           required: true,
         },

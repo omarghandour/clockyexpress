@@ -204,10 +204,9 @@ const addToCart = async (req: Request, res: Response) => {
 };
 //  checkout
 const createCheckout = async (req: Request, res: Response) => {
+  const { userId, products, totalPrice, paymentMethod, shippingAddress } =
+    req.body;
   try {
-    const { userId, products, totalPrice, paymentMethod, shippingAddress } =
-      req.body;
-
     // Validate required fields
     if (
       !userId ||
