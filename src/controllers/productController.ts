@@ -4,6 +4,7 @@ import Cart from "../models/Cart";
 import User from "../models/user";
 import Favorite from "../models/AddToFavorite";
 import NewArrival from "../models/NewArrival";
+import CheckOuts from "../models/CheckOuts";
 // import Cart from "../models/Cart";
 
 const getProducts = async (req: Request, res: Response) => {
@@ -201,8 +202,44 @@ const addToCart = async (req: Request, res: Response) => {
       .json({ message: "Failed to update cart", error: error.message });
   }
 };
+//  checkout
+const createCheckout = async (req: Request, res: Response) => {
+  try {
+    const { userId, products, totalPrice, paymentMethod, shippingAddress } =
+      req.body;
 
-export default addToCart;
+    // Validate required fields
+    if (
+      !userId ||
+      !products ||
+      !totalPrice ||
+      !paymentMethod ||
+      !shippingAddress
+    ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Create a new checkout instance
+    const newCheckout = new CheckOuts({
+      userId,
+      products,
+      totalPrice,
+      paymentMethod,
+      shippingAddress,
+    });
+
+    // Save the checkout to the database
+    const savedCheckout = await newCheckout.save();
+
+    res.status(201).json({
+      message: "Checkout completed successfully",
+      checkout: savedCheckout,
+    });
+  } catch (error) {
+    console.error("Error creating checkout:", error);
+    res.status(500).json({ error: "Server error during checkout" });
+  }
+};
 
 // Favorites
 const AddToFavorite = async (req: Request, res: Response) => {
@@ -253,4 +290,5 @@ export {
   addToCart,
   AddToFavorite,
   RemoveFromFavorite,
+  createCheckout,
 };
