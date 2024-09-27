@@ -11,27 +11,38 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Define allowed origins for CORS
 const allowedOrigins = ["https://www.clockyeg.com"];
 
+// Configure CORS options
 const corsOptions = {
-  origin: function (origin: any, callback: any) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
+  origin: function (
+    origin: string | undefined,
+    callback: (err: any, allow?: boolean) => void
+  ) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true); // Allow the request
     } else {
-      callback(new Error("Not allowed by CORS"));
+      callback(new Error("Not allowed by CORS")); // Deny the request
     }
   },
+  methods: "GET,POST,OPTIONS", // Specify allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
+  credentials: true, // Allow credentials (cookies, authorization headers)
 };
 
+// Enable CORS with the specified options
 app.use(cors(corsOptions));
 
+// Swagger setup
 const swaggerDefinition = {
   info: {
     title: "E-commerce API",
     version: "0.1.0",
     description: "API for an e-commerce platform",
   },
-  host: "localhost",
+  host: "localhost", // Update this if deploying to a production environment
   basePath: "/api",
   schemes: ["http"],
 };
@@ -44,20 +55,13 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware to parse JSON
 app.use(express.json());
-// cors
-// app.use(function (req, res, next) {
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-//   res.header("Access-Control-Allow-Headers", "Content-Type");
-//   next();
-// });
-// app.get("/", (req, res) => {
-//   res.json("success").status(201);
-// });
 
 // API Routes
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
+
+// Handle preflight requests (OPTIONS)
+app.options("*", cors(corsOptions)); // Enable preflight for all routes
 
 // Start server
 const PORT = process.env.PORT || 5000;
