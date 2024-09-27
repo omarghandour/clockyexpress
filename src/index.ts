@@ -11,12 +11,19 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(
-  cors({
-    origin: "*", // Front-end URL
-    credentials: true, // Allow credentials like cookies and tokens
-  })
-);
+const allowedOrigins = ["https://www.clockyeg.com"];
+
+const corsOptions = {
+  origin: function (origin: any, callback: any) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
+app.use(cors(corsOptions));
 
 const swaggerDefinition = {
   info: {
