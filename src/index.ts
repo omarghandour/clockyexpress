@@ -13,7 +13,7 @@ connectDB();
 const app = express();
 
 // Define allowed origins for CORS
-const allowedOrigins = ["https://www.clockyeg.com"];
+const allowedOrigins = ["https://www.clockyeg.com", "http://localhost:3000"];
 
 // Configure CORS options
 const corsOptions = {
