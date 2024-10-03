@@ -15,7 +15,14 @@ const getProducts = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to retrieve products" });
   }
 };
-
+const getFeatured = async (req: Request, res: Response) => {
+  try {
+    const featuredProducts = await Product.find({ class: "Featured" });
+    res.status(200).json(featuredProducts);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve featured products" });
+  }
+};
 const getProductById = async (req: Request, res: Response) => {
   try {
     const { PID } = req.params;
@@ -281,6 +288,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
 };
 export {
   getProducts,
+  getFeatured,
   addProduct,
   getProductById,
   removeProduct,

@@ -11,6 +11,7 @@ interface IProduct extends Document {
   caseColor: string;
   dialColor: string;
   movmentType: string;
+  class: string;
   attachment: mongoose.Schema.Types.ObjectId[];
   img: string;
 }
@@ -32,6 +33,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
         ref: "File",
       },
     ],
+    class: { type: String, required: true },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
     img: { type: String, required: true },
   },

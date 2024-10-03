@@ -33,13 +33,16 @@ import {
   AddToFavorite,
   RemoveFromFavorite,
   createCheckout,
+  getFeatured,
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
 router.route("/").get(getProducts).post(authMiddleware, addProduct);
+router.route("/featured").get(getFeatured);
 router.route("/dashboard").get(authMiddleware, getProducts);
+
 router
   .route("/:PID")
   .get(getProductById)
