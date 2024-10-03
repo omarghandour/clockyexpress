@@ -51,7 +51,9 @@ const getNewArrivals = async (req: Request, res: Response) => {
   }
 };
 const getGender = async (req: Request, res: Response) => {
-  const gender = req.params.gender;
+  const gender = req.query.gender;
+  // console.log(req.params);
+
   if (gender === undefined || gender === null) {
     return res.status(400).json({ message: "Invalid gender provided" });
   }
