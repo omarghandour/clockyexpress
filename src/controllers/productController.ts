@@ -9,7 +9,26 @@ import CheckOuts from "../models/CheckOuts";
 
 const getProducts = async (req: Request, res: Response) => {
   try {
+    // Get the current date
+    const currentDate = new Date();
+
+    // Fetch new arrivals
+    const newArrivals = await NewArrival.find();
+
+    // Filter out and delete products older than 1 week
+    for (const arrival of newArrivals) {
+      const oneWeekAgo = new Date(currentDate);
+      oneWeekAgo.setDate(currentDate.getDate() - 7);
+
+      // Check if the product creation date is older than 7 days
+      if (arrival.createdAt < oneWeekAgo) {
+        await NewArrival.findByIdAndDelete(arrival._id); // Delete from NewArrival
+      }
+    }
+
+    // Fetch all products after cleaning up old arrivals
     const products = await Product.find();
+
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve products" });
@@ -21,6 +40,14 @@ const getFeatured = async (req: Request, res: Response) => {
     res.status(200).json(featuredProducts);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve featured products" });
+  }
+};
+const getNewArrivals = async (req: Request, res: Response) => {
+  try {
+    const newArrivals = await NewArrival.find();
+    res.status(200).json(newArrivals);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve new arrivals" });
   }
 };
 const getProductById = async (req: Request, res: Response) => {
@@ -289,6 +316,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
 export {
   getProducts,
   getFeatured,
+  getNewArrivals,
   addProduct,
   getProductById,
   removeProduct,
