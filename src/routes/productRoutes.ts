@@ -35,6 +35,7 @@ import {
   createCheckout,
   getFeatured,
   getNewArrivals,
+  getGender,
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -43,6 +44,7 @@ const router = Router();
 router.route("/").get(getProducts).post(authMiddleware, addProduct);
 router.route("/featured").get(getFeatured);
 router.route("/newArrival").get(getNewArrivals);
+router.route("/gender").get(getGender);
 router.route("/dashboard").get(authMiddleware, getProducts);
 
 router

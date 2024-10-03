@@ -50,6 +50,21 @@ const getNewArrivals = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to retrieve new arrivals" });
   }
 };
+const getGender = async (req: Request, res: Response) => {
+  const gender = req.params.gender;
+  if (gender === undefined || gender === null) {
+    return res.status(400).json({ message: "Invalid gender provided" });
+  }
+  try {
+    if (gender !== "men" && gender !== "women" && gender !== "unisex") {
+      return res.status(400).json({ message: "Invalid gender provided" });
+    }
+    const products = await Product.find({ gender });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve products by gender" });
+  }
+};
 const getProductById = async (req: Request, res: Response) => {
   try {
     const { PID } = req.params;
@@ -317,6 +332,7 @@ export {
   getProducts,
   getFeatured,
   getNewArrivals,
+  getGender,
   addProduct,
   getProductById,
   removeProduct,
