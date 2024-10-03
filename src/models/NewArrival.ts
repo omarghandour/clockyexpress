@@ -34,7 +34,7 @@ const NewArrivalSchema: Schema<INewArrival> = new Schema(
         ref: "File",
       },
     ],
-    class: { type: String, required: true },
+    class: { type: String },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
     img: { type: String, required: true },
   },
