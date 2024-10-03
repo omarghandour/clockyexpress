@@ -34,6 +34,26 @@ const getProducts = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to retrieve products" });
   }
 };
+const getSearch = async (req: Request, res: Response) => {
+  const { keyword } = req.query;
+
+  if (keyword === undefined || keyword === null) {
+    return res.status(400).json({ message: "Invalid keyword provided" });
+  }
+
+  try {
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ],
+    });
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve products by keyword" });
+  }
+};
 const getFeatured = async (req: Request, res: Response) => {
   try {
     const featuredProducts = await Product.find({ class: "Featured" });
@@ -332,6 +352,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
 };
 export {
   getProducts,
+  getSearch,
   getFeatured,
   getNewArrivals,
   getGender,

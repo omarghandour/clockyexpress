@@ -36,12 +36,14 @@ import {
   getFeatured,
   getNewArrivals,
   getGender,
+  getSearch,
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
 router.route("/").get(getProducts).post(authMiddleware, addProduct);
+router.route("/search").get(getSearch);
 router.route("/featured").get(getFeatured);
 router.route("/newArrival").get(getNewArrivals);
 router.route("/gender").get(getGender);
