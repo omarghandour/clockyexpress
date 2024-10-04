@@ -87,13 +87,20 @@ const getGender = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to retrieve products by gender" });
   }
 };
-const getProductById = async (req: Request, res: Response) => {
+const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { PID } = req.params;
-    const product = await Product.findById(PID);
+
+    // Find product in both Product and NewArrival collections
+    const product =
+      (await Product.findById(PID)) || (await NewArrival.findById(PID));
+
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      res.status(404).json({ message: "Product not found" });
+      return;
     }
+
+    // Respond with the found product
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve product" });
