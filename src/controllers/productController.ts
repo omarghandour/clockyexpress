@@ -284,20 +284,27 @@ const addToCart = async (req: Request, res: Response) => {
 const createCheckout = async (req: Request, res: Response) => {
   const { userId, products, totalPrice, paymentMethod, shippingAddress } =
     req.body;
+
   try {
     // Validate required fields
     if (!products || !totalPrice || !paymentMethod || !shippingAddress) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Create a new checkout instance
-    const newCheckout = new CheckOuts({
-      userId,
+    // Create the checkout object, conditionally including userId
+    const newCheckoutData: any = {
       products,
       totalPrice,
       paymentMethod,
       shippingAddress,
-    });
+    };
+
+    if (userId) {
+      newCheckoutData.userId = userId;
+    }
+
+    // Create a new checkout instance
+    const newCheckout = new CheckOuts(newCheckoutData);
 
     // Save the checkout to the database
     const savedCheckout = await newCheckout.save();
