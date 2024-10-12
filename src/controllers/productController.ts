@@ -377,6 +377,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
   const { id } = req.params; // User ID
   const { ProductId } = req.body; // Product ID
   if (!id || id === undefined || id === null || id === "10") {
+    throw new Error("User ID is required");
     return res.status(400).json({ message: "User ID is required" });
   }
   try {
