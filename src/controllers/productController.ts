@@ -286,13 +286,7 @@ const createCheckout = async (req: Request, res: Response) => {
     req.body;
   try {
     // Validate required fields
-    if (
-      !userId ||
-      !products ||
-      !totalPrice ||
-      !paymentMethod ||
-      !shippingAddress
-    ) {
+    if (!products || !totalPrice || !paymentMethod || !shippingAddress) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -356,12 +350,18 @@ const AddToFavorite = async (req: Request, res: Response) => {
 const isFavorite = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { ProductId } = req.body;
+  if (!id || id === undefined || id === null || id === "10") {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
   try {
     const favorite = await Favorite.findOne({
       user: id,
       products: ProductId,
     });
     if (favorite) {
+      console.log(favorite);
+
       res.status(200).json({ isFavorite: true });
     } else {
       res.status(200).json({ isFavorite: false });
