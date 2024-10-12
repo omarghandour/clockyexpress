@@ -60,9 +60,6 @@ router.route("/cart/:id").get(cartProduct).post(addToCart);
 // checkouts
 router.route("/checkout").post(createCheckout);
 // Favorites
-router
-  .route("/favorites/:id")
-  .post(authMiddleware, AddToFavorite)
-  .delete(authMiddleware, RemoveFromFavorite);
+router.route("/favorites/:id").post(AddToFavorite).delete(RemoveFromFavorite);
 router.route("/isFavorite/:id").post(isFavorite);
 export default router;
