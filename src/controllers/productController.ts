@@ -318,29 +318,41 @@ const createCheckout = async (req: Request, res: Response) => {
   }
 };
 
-// Favorites
 const AddToFavorite = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { ProductId } = req.body;
+  const { id } = req.params; // User ID
+  const { ProductId } = req.body; // Product ID
+
   try {
-    // find user by id
-    // const user = await User.findById(id);
-    // const product = Product.findById(ProductId);
-    const favorite = await Favorite.find({ user: id });
-    if (favorite) {
-      const favorite = new Favorite({
+    // Find the user's favorites
+    let favorite = await Favorite.findOne({ user: id });
+
+    if (!favorite) {
+      // If no favorite document exists for the user, create one
+      favorite = new Favorite({
         user: id,
-        Product: ProductId,
+        products: [ProductId],
       });
+    } else {
+      // Check if the product is already in the user's favorites
+      if (favorite.products.includes(ProductId)) {
+        return res
+          .status(400)
+          .json({ message: "Product is already in favorites" });
+      }
 
-      await favorite.save();
+      // Add the product to the favorites array
+      favorite.products.push(ProductId);
     }
-  } catch (error) {
-    console.log(error);
 
-    res.status(500).json({ message: "Failed to add to favorite" });
+    // Save the updated favorites document
+    await favorite.save();
+    res.status(200).json({ message: "Added to favorites" });
+  } catch (error) {
+    console.error("Failed to add to favorites:", error);
+    res.status(500).json({ message: "Failed to add to favorites" });
   }
 };
+
 const isFavorite = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { ProductId } = req.body;
@@ -360,21 +372,33 @@ const isFavorite = async (req: Request, res: Response) => {
   }
 };
 const RemoveFromFavorite = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { ProductId } = req.body;
+  const { id } = req.params; // User ID
+  const { ProductId } = req.body; // Product ID
+
   try {
-    const favorite = await Favorite.findOneAndDelete({
-      user: id,
-      products: ProductId,
-    });
-    if (!favorite) {
-      return res.status(404).json({ message: "Favorite not found" });
+    // Find the user's favorites
+    const favorite = await Favorite.findOne({ user: id });
+
+    if (!favorite || !favorite.products.includes(ProductId)) {
+      return res
+        .status(404)
+        .json({ message: "Product not found in favorites" });
     }
-    res.status(200).json({ message: "Favorite deleted successfully" });
+
+    // Remove the product from the favorites array
+    favorite.products = favorite.products.filter(
+      (product) => product.toString() !== ProductId
+    );
+
+    // Save the updated document
+    await favorite.save();
+    res.status(200).json({ message: "Removed from favorites" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete favorite" });
+    console.error("Failed to remove from favorites:", error);
+    res.status(500).json({ message: "Failed to remove from favorites" });
   }
 };
+
 export {
   getProducts,
   getSearch,
