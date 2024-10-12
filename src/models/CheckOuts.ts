@@ -2,7 +2,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface ICheckout extends Document {
-  userId: string; // ID of the user making the purchase
+  userId?: string; // ID of the user making the purchase
   products: {
     productId: string;
     name: string;
@@ -29,7 +29,6 @@ const CheckoutSchema: Schema = new Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     products: [
       {

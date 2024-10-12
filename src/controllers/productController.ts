@@ -299,7 +299,7 @@ const createCheckout = async (req: Request, res: Response) => {
       shippingAddress,
     };
 
-    if (userId) {
+    if (userId && userId !== undefined && userId !== null) {
       newCheckoutData.userId = userId;
     }
 
