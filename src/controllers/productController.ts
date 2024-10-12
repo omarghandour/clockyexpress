@@ -341,6 +341,24 @@ const AddToFavorite = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to add to favorite" });
   }
 };
+const isFavorite = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { ProductId } = req.body;
+  try {
+    const favorite = await Favorite.findOne({
+      user: id,
+      products: ProductId,
+    });
+    if (favorite) {
+      res.status(200).json({ isFavorite: true });
+    } else {
+      res.status(200).json({ isFavorite: false });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to check if favorite" });
+  }
+};
 const RemoveFromFavorite = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { ProductId } = req.body;
@@ -370,6 +388,7 @@ export {
   cartProduct,
   addToCart,
   AddToFavorite,
+  isFavorite,
   RemoveFromFavorite,
   createCheckout,
 };

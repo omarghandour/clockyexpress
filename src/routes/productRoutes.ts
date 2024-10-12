@@ -37,6 +37,7 @@ import {
   getNewArrivals,
   getGender,
   getSearch,
+  isFavorite,
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -59,5 +60,9 @@ router.route("/cart/:id").get(cartProduct).post(addToCart);
 // checkouts
 router.route("/checkout").post(createCheckout);
 // Favorites
-router.route("/favorites/:id").post(AddToFavorite).delete(RemoveFromFavorite);
+router
+  .route("/favorites/:id")
+  .post(AddToFavorite)
+  .delete(RemoveFromFavorite)
+  .get(isFavorite);
 export default router;
