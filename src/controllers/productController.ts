@@ -315,7 +315,9 @@ const createCheckout = async (req: Request, res: Response) => {
 const AddToFavorite = async (req: Request, res: Response) => {
   const { id } = req.params; // User ID
   const { ProductId } = req.body; // Product ID
-
+  if (!id || id === undefined || id === null || id === "10") {
+    return res.status(400).json({ message: "User ID is required" });
+  }
   try {
     // Find the user's favorites
     let favorite = await Favorite.findOne({ user: id });
@@ -374,7 +376,9 @@ const isFavorite = async (req: Request, res: Response) => {
 const RemoveFromFavorite = async (req: Request, res: Response) => {
   const { id } = req.params; // User ID
   const { ProductId } = req.body; // Product ID
-
+  if (!id || id === undefined || id === null || id === "10") {
+    return res.status(400).json({ message: "User ID is required" });
+  }
   try {
     // Find the user's favorites
     const favorite = await Favorite.findOne({ user: id });
