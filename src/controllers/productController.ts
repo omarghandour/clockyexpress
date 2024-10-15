@@ -318,7 +318,24 @@ const createCheckout = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Server error during checkout" });
   }
 };
+// Controller to fetch favorite products
+const getFavoriteProducts = async (req: Request, res: Response) => {
+  const { id } = req.params;
 
+  try {
+    // Fetch the user's favorite products
+    const favorite = await Favorite.findOne({ user: id }).populate("products");
+
+    if (!favorite || favorite.products.length === 0) {
+      return res.status(404).json({ message: "No favorite products found" });
+    }
+
+    return res.status(200).json(favorite.products);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 const AddToFavorite = async (req: Request, res: Response) => {
   const { id } = req.params; // User ID
   const { ProductId } = req.body; // Product ID
@@ -424,6 +441,7 @@ export {
   cartProduct,
   addToCart,
   AddToFavorite,
+  getFavoriteProducts,
   isFavorite,
   RemoveFromFavorite,
   createCheckout,
