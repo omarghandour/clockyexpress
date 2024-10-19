@@ -6,7 +6,18 @@ import Favorite from "../models/AddToFavorite";
 import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
 import File from "../models/Files";
+import sdk from "node-appwrite";
+import { Readable } from "stream";
+import fs from "fs";
+import path from "path";
 // import Cart from "../models/Cart";
+// Initialize Appwrite client and storage
+const client = new sdk.Client();
+const storage: any = new sdk.Storage(client);
+client
+  .setEndpoint("https://[APPWRITE-ENDPOINT]") // Your Appwrite endpoint
+  .setProject("[APPWRITE-PROJECT-ID]") // Your Appwrite project ID
+  .setKey("[APPWRITE-API-KEY]"); // Your Appwrite API key
 
 const getProducts = async (req: Request, res: Response) => {
   try {
@@ -110,7 +121,6 @@ const getProductById = async (req: Request, res: Response): Promise<void> => {
 
 const addProduct = async (req: Request, res: Response) => {
   try {
-    // Handle the file upload
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
@@ -128,15 +138,21 @@ const addProduct = async (req: Request, res: Response) => {
       class: productClass,
     } = req.body;
 
-    // Save the uploaded file in the File collection (optional)
-    const file = new File({
-      name: req.file.originalname,
-      contentType: req.file.mimetype,
-      path: req.file.path, // Save the path of the uploaded image
-    });
-    await file.save();
+    // Convert buffer to readable stream for Appwrite
+    const fileStream = Readable.from(req.file.buffer);
 
-    // Create the product and save the image path in the `img` field
+    // Upload the file directly to Appwrite from memory
+    const response = await storage.createFile(
+      process.env.APPWRITE_BUCKET_ID || "",
+      sdk.ID.unique(),
+      fileStream,
+      req.file.originalname
+    );
+
+    // Construct the file URL
+    const fileUrl = `${process.env.APPWRITE_ENDPOINT}/v1/storage/buckets/${process.env.APPWRITE_BUCKET_ID}/files/${response.$id}/view?project=${process.env.APPWRITE_PROJECT_ID}`;
+
+    // Create the product and store the Appwrite file ID
     const product = new Product({
       name,
       price,
@@ -148,18 +164,18 @@ const addProduct = async (req: Request, res: Response) => {
       dialColor,
       movmentType,
       class: productClass,
-      img: req.file.path, // Store the file path of the image
+      img: response.$id, // Store file ID, not the path
     });
 
     const createdProduct = await product.save();
 
-    // Response to client
     res.status(201).json({
       message: "Product added successfully",
       product: createdProduct,
+      fileUrl,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error adding product:", error);
     res.status(500).json({ message: "Failed to add product" });
   }
 };

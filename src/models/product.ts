@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-// Define the interface for the Product schema
 interface IProduct extends Document {
   name: string;
   price: number;
@@ -13,10 +12,9 @@ interface IProduct extends Document {
   movmentType: string;
   class: string;
   attachment: mongoose.Schema.Types.ObjectId[];
-  img: string; // File path for the uploaded image
+  img: string;
 }
 
-// Create the Product schema
 const ProductSchema: Schema<IProduct> = new Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -34,22 +32,18 @@ const ProductSchema: Schema<IProduct> = new Schema(
     attachment: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "File", // Assuming "File" is a model for attachments (like additional product images or files)
+        ref: "File",
       },
     ],
     class: { type: String },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
-    img: { type: String, required: true }, // File path for the uploaded image
+    img: { type: String, required: true }, // Store the file ID from Appwrite
   },
-  {
-    timestamps: true, // Automatically manage createdAt and updatedAt fields
-  }
+  { timestamps: true }
 );
 
-// Export the Product model
 const Product: Model<IProduct> = mongoose.model<IProduct>(
   "Product",
   ProductSchema
 );
-
 export default Product;
