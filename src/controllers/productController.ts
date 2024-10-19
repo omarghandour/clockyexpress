@@ -5,19 +5,7 @@ import User from "../models/user";
 import Favorite from "../models/AddToFavorite";
 import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
-import File from "../models/Files";
-import sdk from "node-appwrite";
-import { Readable } from "stream";
-import fs from "fs";
-import path from "path";
 // import Cart from "../models/Cart";
-// Initialize Appwrite client and storage
-const client = new sdk.Client();
-const storage: any = new sdk.Storage(client);
-client
-  .setEndpoint("https://[APPWRITE-ENDPOINT]") // Your Appwrite endpoint
-  .setProject("[APPWRITE-PROJECT-ID]") // Your Appwrite project ID
-  .setKey("[APPWRITE-API-KEY]"); // Your Appwrite API key
 
 const getProducts = async (req: Request, res: Response) => {
   try {
@@ -121,61 +109,47 @@ const getProductById = async (req: Request, res: Response): Promise<void> => {
 
 const addProduct = async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-
     const {
       name,
       price,
       description,
       countInStock,
+      img,
       before,
       gender,
       caseColor,
       dialColor,
-      movmentType,
-      class: productClass,
     } = req.body;
-
-    // Convert buffer to readable stream for Appwrite
-    const fileStream = Readable.from(req.file.buffer);
-
-    // Upload the file directly to Appwrite from memory
-    const response = await storage.createFile(
-      process.env.APPWRITE_BUCKET_ID || "",
-      sdk.ID.unique(),
-      fileStream,
-      req.file.originalname
-    );
-
-    // Construct the file URL
-    const fileUrl = `${process.env.APPWRITE_ENDPOINT}/v1/storage/buckets/${process.env.APPWRITE_BUCKET_ID}/files/${response.$id}/view?project=${process.env.APPWRITE_PROJECT_ID}`;
-
-    // Create the product and store the Appwrite file ID
+    // console.log(req.body);
+    const newArrival = new NewArrival({
+      name,
+      price,
+      before,
+      gender,
+      caseColor,
+      dialColor,
+      description,
+      countInStock,
+      img,
+    });
     const product = new Product({
       name,
       price,
-      description,
-      countInStock,
       before,
       gender,
       caseColor,
       dialColor,
-      movmentType,
-      class: productClass,
-      img: response.$id, // Store file ID, not the path
+      description,
+      countInStock,
+      img,
     });
 
     const createdProduct = await product.save();
-
-    res.status(201).json({
-      message: "Product added successfully",
-      product: createdProduct,
-      fileUrl,
-    });
+    const newArrivaled = await newArrival.save();
+    res.status(201).json({ products: createdProduct, new: newArrivaled });
   } catch (error) {
-    console.error("Error adding product:", error);
+    console.log(error);
+
     res.status(500).json({ message: "Failed to add product" });
   }
 };
@@ -425,7 +399,7 @@ const isFavorite = async (req: Request, res: Response) => {
 };
 const RemoveFromFavorite = async (req: Request, res: Response) => {
   const { id } = req.params; // User ID
-  const { ProductId }: any = req.body; // Product ID
+  const { ProductId } = req.body; // Product ID
   if (!id || id === undefined || id === null || id === "10") {
     throw new Error("User ID is required");
     return res.status(400).json({ message: "User ID is required" });
@@ -442,7 +416,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
 
     // Remove the product from the favorites array
     favorite.products = favorite.products.filter(
-      (product: { toString: () => any }) => product.toString() !== ProductId
+      (product) => product.toString() !== ProductId
     );
 
     // Save the updated document

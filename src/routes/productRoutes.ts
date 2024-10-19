@@ -21,34 +21,6 @@
  *               items:
  *                 $ref: '#/components/schemas/Product'
  */
-/**
- * @swagger
- * /products/favorites/{id}:
- *   get:
- *     summary: Retrieve user's favorite products
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the user
- *     responses:
- *       200:
- *         description: List of favorite products
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
- *       404:
- *         description: No favorite products found for the user
- *       500:
- *         description: Internal server error
- */
-
 import { Router } from "express";
 import {
   getProducts,
@@ -69,14 +41,10 @@ import {
   getFavoriteProducts, // Add this
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import upload from "../middlewares/multer"; // The multer middleware
 
 const router = Router();
 
-router
-  .route("/")
-  .get(getProducts)
-  .post(authMiddleware, upload.single("img"), addProduct);
+router.route("/").get(getProducts).post(authMiddleware, addProduct);
 router.route("/search").get(getSearch);
 router.route("/featured").get(getFeatured);
 router.route("/newArrival").get(getNewArrivals);
