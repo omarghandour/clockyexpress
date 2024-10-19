@@ -13,7 +13,7 @@ interface IProduct extends Document {
   movmentType: string;
   class: string;
   attachment: mongoose.Schema.Types.ObjectId[];
-  img: string;
+  img: string; // File path for the uploaded image
 }
 
 // Create the Product schema
@@ -23,19 +23,23 @@ const ProductSchema: Schema<IProduct> = new Schema(
     price: { type: Number, required: true, min: 0 },
     before: { type: Number, min: 0 },
     description: { type: String, required: true, trim: true },
-    gender: { type: String, enum: ["men", "women", "unisex"] },
+    gender: { type: String, enum: ["men", "women", "unisex"], required: true },
     caseColor: { type: String },
     dialColor: { type: String },
-    movmentType: { type: String, enum: ["automatic", "quartz"] },
+    movmentType: {
+      type: String,
+      enum: ["automatic", "quartz"],
+      required: true,
+    },
     attachment: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "File",
+        ref: "File", // Assuming "File" is a model for attachments (like additional product images or files)
       },
     ],
     class: { type: String },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
-    img: { type: String, required: true },
+    img: { type: String, required: true }, // File path for the uploaded image
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt fields

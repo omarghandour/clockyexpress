@@ -5,6 +5,7 @@ import User from "../models/user";
 import Favorite from "../models/AddToFavorite";
 import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
+import File from "../models/Files";
 // import Cart from "../models/Cart";
 
 const getProducts = async (req: Request, res: Response) => {
@@ -109,47 +110,56 @@ const getProductById = async (req: Request, res: Response): Promise<void> => {
 
 const addProduct = async (req: Request, res: Response) => {
   try {
+    // Handle the file upload
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
     const {
       name,
       price,
       description,
       countInStock,
-      img,
       before,
       gender,
       caseColor,
       dialColor,
+      movmentType,
+      class: productClass,
     } = req.body;
-    // console.log(req.body);
-    const newArrival = new NewArrival({
-      name,
-      price,
-      before,
-      gender,
-      caseColor,
-      dialColor,
-      description,
-      countInStock,
-      img,
+
+    // Save the uploaded file in the File collection (optional)
+    const file = new File({
+      name: req.file.originalname,
+      contentType: req.file.mimetype,
+      path: req.file.path, // Save the path of the uploaded image
     });
+    await file.save();
+
+    // Create the product and save the image path in the `img` field
     const product = new Product({
       name,
       price,
+      description,
+      countInStock,
       before,
       gender,
       caseColor,
       dialColor,
-      description,
-      countInStock,
-      img,
+      movmentType,
+      class: productClass,
+      img: req.file.path, // Store the file path of the image
     });
 
     const createdProduct = await product.save();
-    const newArrivaled = await newArrival.save();
-    res.status(201).json({ products: createdProduct, new: newArrivaled });
-  } catch (error) {
-    console.log(error);
 
+    // Response to client
+    res.status(201).json({
+      message: "Product added successfully",
+      product: createdProduct,
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to add product" });
   }
 };
