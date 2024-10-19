@@ -1,13 +1,29 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-// Set storage engine for multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Directory where files will be stored
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Define the uploads directory
+const uploadsDir = path.join(__dirname, "uploads");
+
+// Create the directory if it doesn't exist
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer storage
+const storage: any = multer.diskStorage({
+  destination: function (req: any, file: any, cb: any) {
+    console.log(`Uploading to: ${uploadsDir}`); // Log the upload directory
+    cb(null, uploadsDir);
   },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`); // Unique file name
+  filename: function (req: any, file: any, cb: any) {
+    const timestamp = Date.now();
+    cb(null, `${timestamp}-${file.originalname}`);
   },
 });
 
@@ -22,7 +38,7 @@ const fileFilter = (req: any, file: any, cb: any) => {
 };
 
 // Initialize multer
-const upload = multer({
+const upload: any = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 1024 * 1024 * 5 }, // 5 MB size limit
