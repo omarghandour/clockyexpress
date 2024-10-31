@@ -14,6 +14,8 @@ interface ICheckout extends Document {
   status: string; // E.g., "Pending", "Completed", "Cancelled"
   shippingAddress: {
     fullName: string;
+    firstName: string;
+    lastName: string;
     address: string;
     city: string;
     postalCode: string;

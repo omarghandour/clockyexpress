@@ -34,6 +34,20 @@ const getProducts = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to retrieve products" });
   }
 };
+const getBrand = async (req: Request, res: Response) => {
+  const { brand } = req.query;
+
+  if (brand === undefined || brand === null) {
+    return res.status(400).json({ message: "Invalid brand provided" });
+  }
+
+  try {
+    const products = await Product.find({ brand });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve products by brand" });
+  }
+};
 const getSearch = async (req: Request, res: Response) => {
   const { keyword } = req.query;
 
@@ -430,6 +444,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
 
 export {
   getProducts,
+  getBrand,
   getSearch,
   getFeatured,
   getNewArrivals,

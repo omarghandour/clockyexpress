@@ -8,6 +8,7 @@ interface IProduct extends Document {
   description: string;
   countInStock: number;
   gender: string;
+  brand: string;
   caseColor: string;
   dialColor: string;
   movmentType: string;
@@ -24,6 +25,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     before: { type: Number, min: 0 },
     description: { type: String, required: true, trim: true },
     gender: { type: String, enum: ["men", "women", "unisex"] },
+    brand: { type: String, trim: true },
     caseColor: { type: String },
     dialColor: { type: String },
     movmentType: { type: String, enum: ["automatic", "quartz"] },
