@@ -46,7 +46,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 const router = Router();
 
 router.route("/").get(getProducts).post(authMiddleware, addProduct);
-router.route("/brand").get(getBrand);
+router.route("/brand/:brand").get(getBrand);
 router.route("/search").get(getSearch);
 router.route("/featured").get(getFeatured);
 router.route("/newArrival").get(getNewArrivals);
