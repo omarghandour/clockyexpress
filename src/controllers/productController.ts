@@ -35,7 +35,7 @@ const getProducts = async (req: Request, res: Response) => {
   }
 };
 const getBrand = async (req: Request, res: Response) => {
-  const { brand } = req.query;
+  const { brand } = req.params;
 
   if (brand === undefined || brand === null) {
     return res.status(400).json({ message: "Invalid brand provided" });
