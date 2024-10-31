@@ -44,7 +44,8 @@ const getBrand = async (req: Request, res: Response) => {
   try {
     const products = await Product.find({ brand });
     res.status(200).json(products);
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     res.status(500).json({ message: "Failed to retrieve products by brand" });
   }
 };
