@@ -7,33 +7,50 @@ import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
 // import Cart from "../models/Cart";
 
+// Helper type for pagination
+interface Pagination {
+  limit: number;
+  page: number;
+}
+
+// Define types for query parameters to ensure TypeScript type safety
+interface GetProductParams {
+  sortBy?: string; // Field to sort by (optional)
+  order?: "asc" | "desc"; // Order of sorting (ascending or descending)
+  limit?: string; // Limit number of products returned (optional)
+}
+
 const getProducts = async (req: Request, res: Response) => {
   try {
-    // Get the current date
-    const currentDate = new Date();
+    // Destructure query parameters with default values
+    const {
+      sortBy = "name",
+      order = "asc",
+      limit = "10",
+    } = req.query as GetProductParams;
 
-    // Fetch new arrivals
-    const newArrivals = await NewArrival.find();
+    // Build the sort options dynamically using a computed property
+    const sortOptions: { [key: string]: "asc" | "desc" } = {
+      [sortBy]: order,
+    };
 
-    // Filter out and delete products older than 1 week
-    for (const arrival of newArrivals) {
-      const oneWeekAgo = new Date(currentDate);
-      oneWeekAgo.setDate(currentDate.getDate() - 7);
+    // Convert limit to a number for the query, and set a default if not provided
+    const limitNumber = parseInt(limit, 10) || 10;
 
-      // Check if the product creation date is older than 7 days
-      if (arrival.createdAt < oneWeekAgo) {
-        await NewArrival.findByIdAndDelete(arrival._id); // Delete from NewArrival
-      }
-    }
+    // Fetch products from the database with sorting and limiting
+    const products = await Product.find()
+      .sort(sortOptions) // Apply sorting
+      .limit(limitNumber); // Limit the number of results
 
-    // Fetch all products after cleaning up old arrivals
-    const products = await Product.find();
-
-    res.status(200).json(products);
+    // Respond with the fetched products
+    res.json(products);
   } catch (error) {
-    res.status(500).json({ message: "Failed to retrieve products" });
+    console.error("Error fetching products:", error);
+    // Send a server error response with a descriptive message
+    res.status(500).json({ message: "Server error while fetching products" });
   }
 };
+
 const getBrand = async (req: Request, res: Response) => {
   const { brand } = req.params;
 
