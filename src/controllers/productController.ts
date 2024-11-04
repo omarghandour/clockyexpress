@@ -13,40 +13,37 @@ interface Pagination {
   page: number;
 }
 
-// Define types for query parameters to ensure TypeScript type safety
 interface GetProductParams {
-  sortBy?: string; // Field to sort by (optional)
-  order?: "asc" | "desc"; // Order of sorting (ascending or descending)
-  limit?: string; // Limit number of products returned (optional)
+  sortBy?: string;
+  order?: "asc" | "desc";
+  limit?: string;
+  page?: string;
 }
 
 const getProducts = async (req: Request, res: Response) => {
   try {
-    // Destructure query parameters with default values
     const {
       sortBy = "name",
       order = "asc",
       limit = "10",
+      page = "1",
     } = req.query as GetProductParams;
 
-    // Build the sort options dynamically using a computed property
+    const limitNumber = Math.min(parseInt(limit, 10) || 10, 100);
+    const pageNumber = parseInt(page, 10) || 1;
+
     const sortOptions: { [key: string]: "asc" | "desc" } = {
       [sortBy]: order,
     };
 
-    // Convert limit to a number for the query, and set a default if not provided
-    const limitNumber = parseInt(limit, 10) || 10;
-
-    // Fetch products from the database with sorting and limiting
     const products = await Product.find()
-      .sort(sortOptions) // Apply sorting
-      .limit(limitNumber); // Limit the number of results
+      .sort(sortOptions)
+      .limit(limitNumber)
+      .skip((pageNumber - 1) * limitNumber);
 
-    // Respond with the fetched products
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
-    // Send a server error response with a descriptive message
     res.status(500).json({ message: "Server error while fetching products" });
   }
 };
