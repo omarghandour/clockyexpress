@@ -6,7 +6,6 @@ import Favorite from "../models/AddToFavorite";
 import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
 // import Cart from "../models/Cart";
-
 // Helper type for pagination
 interface Pagination {
   limit: number;
@@ -20,6 +19,13 @@ interface GetProductParams {
   page?: string;
 }
 
+// Helper function for pagination
+const getPagination = (limit: string, page: string): Pagination => {
+  const limitNumber = Math.min(parseInt(limit, 10) || 10, 100);
+  const pageNumber = parseInt(page, 10) || 1;
+  return { limit: limitNumber, page: pageNumber };
+};
+
 const getProducts = async (req: Request, res: Response) => {
   try {
     const {
@@ -29,11 +35,17 @@ const getProducts = async (req: Request, res: Response) => {
       page = "1",
     } = req.query as GetProductParams;
 
-    const limitNumber = Math.min(parseInt(limit, 10) || 10, 100);
-    const pageNumber = parseInt(page, 10) || 1;
+    // Validate order to ensure it's either 'asc' or 'desc'
+    const sortOrder = order === "desc" ? -1 : 1;
 
-    const sortOptions: { [key: string]: "asc" | "desc" } = {
-      [sortBy]: order,
+    // Validate sortBy field (add more fields as needed for validation)
+    const allowedSortFields = ["name", "price", "createdAt"];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "name";
+
+    const { limit: limitNumber, page: pageNumber } = getPagination(limit, page);
+
+    const sortOptions: any = {
+      [sortField]: sortOrder,
     };
 
     const products = await Product.find()
@@ -44,7 +56,12 @@ const getProducts = async (req: Request, res: Response) => {
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
-    res.status(500).json({ message: "Server error while fetching products" });
+    res.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Server error while fetching products",
+    });
   }
 };
 
