@@ -33,22 +33,31 @@ const getProducts = async (req: Request, res: Response) => {
       order = "asc",
       limit = "10",
       page = "1",
-    } = req.query as GetProductParams;
+      brand,
+      category,
+      minPrice,
+      maxPrice,
+    } = req.query as GetProductParams & {
+      brand?: string;
+      category?: string;
+      minPrice?: string;
+      maxPrice?: string;
+    };
 
-    // Validate order to ensure it's either 'asc' or 'desc'
     const sortOrder = order === "desc" ? -1 : 1;
-
-    // Validate sortBy field (add more fields as needed for validation)
-    const allowedSortFields = ["name", "price", "createdAt"];
+    const allowedSortFields = ["name", "price", "createdAt", "brand"];
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : "name";
 
     const { limit: limitNumber, page: pageNumber } = getPagination(limit, page);
+    const sortOptions: any = { [sortField]: sortOrder };
 
-    const sortOptions: any = {
-      [sortField]: sortOrder,
-    };
+    const filters: any = {};
+    if (brand && brand !== "All") filters.brand = brand;
+    if (category && category !== "All") filters.category = category;
+    if (minPrice) filters.price = { ...filters.price, $gte: Number(minPrice) };
+    if (maxPrice) filters.price = { ...filters.price, $lte: Number(maxPrice) };
 
-    const products = await Product.find()
+    const products = await Product.find(filters)
       .sort(sortOptions)
       .limit(limitNumber)
       .skip((pageNumber - 1) * limitNumber);
@@ -64,7 +73,6 @@ const getProducts = async (req: Request, res: Response) => {
     });
   }
 };
-
 const getBrand = async (req: Request, res: Response) => {
   const { brand } = req.params;
 
