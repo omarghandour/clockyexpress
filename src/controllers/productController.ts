@@ -16,7 +16,7 @@ interface GetProductParams {
   order?: "asc" | "desc";
   limit?: string;
   page?: string;
-  color?: string; // New property
+  caseColor?: string; // New property
 }
 
 // Helper function for pagination
@@ -37,7 +37,7 @@ const getProducts = async (req: Request, res: Response) => {
       category,
       minPrice,
       maxPrice,
-      color, // New property
+      caseColor, // New property
     } = req.query as GetProductParams & {
       brand?: string;
       category?: string;
@@ -54,7 +54,7 @@ const getProducts = async (req: Request, res: Response) => {
     if (category && category !== "All") filters.category = category;
     if (minPrice) filters.price = { ...filters.price, $gte: Number(minPrice) };
     if (maxPrice) filters.price = { ...filters.price, $lte: Number(maxPrice) };
-    if (color && color !== "All") filters.color = color; // New filter condition
+    if (caseColor && caseColor !== "All") filters.color = caseColor; // New filter condition
     const products = await Product.find(filters)
       .sort(sortOptions)
       .limit(limitNumber)
