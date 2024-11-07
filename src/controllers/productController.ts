@@ -6,21 +6,21 @@ import Favorite from "../models/AddToFavorite";
 import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
 // import Cart from "../models/Cart";
-// Helper type for pagination
-interface Pagination {
-  limit: number;
-  page: number;
-}
 interface GetProductParams {
   sortBy?: string;
   order?: "asc" | "desc";
   limit?: string;
   page?: string;
-  caseColor?: string; // New property
+  brand?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  caseColor?: string;
+  dialColor?: string;
 }
 
 // Helper function for pagination
-const getPagination = (limit: string, page: string): Pagination => {
+const getPagination = (limit: string, page: string): any => {
   const limitNumber = Math.min(parseInt(limit, 10) || 10, 100);
   const pageNumber = parseInt(page, 10) || 1;
   return { limit: limitNumber, page: pageNumber };
@@ -37,28 +37,30 @@ const getProducts = async (req: Request, res: Response) => {
       category,
       minPrice,
       maxPrice,
-      caseColor, // New property
-    } = req.query as GetProductParams & {
-      brand?: string;
-      category?: string;
-      minPrice?: string;
-      maxPrice?: string;
-    };
+      caseColor,
+      dialColor,
+    } = req.query as GetProductParams;
+
     const sortOrder = order === "desc" ? -1 : 1;
     const allowedSortFields = ["name", "price", "createdAt", "brand"];
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : "name";
+
     const { limit: limitNumber, page: pageNumber } = getPagination(limit, page);
     const sortOptions: any = { [sortField]: sortOrder };
+
     const filters: any = {};
     if (brand && brand !== "All") filters.brand = brand;
     if (category && category !== "All") filters.category = category;
     if (minPrice) filters.price = { ...filters.price, $gte: Number(minPrice) };
     if (maxPrice) filters.price = { ...filters.price, $lte: Number(maxPrice) };
-    if (caseColor && caseColor !== "All") filters.color = caseColor; // New filter condition
+    if (caseColor && caseColor !== "All") filters.caseColor = caseColor;
+    if (dialColor && dialColor !== "All") filters.dialColor = dialColor;
+
     const products = await Product.find(filters)
       .sort(sortOptions)
       .limit(limitNumber)
       .skip((pageNumber - 1) * limitNumber);
+
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -70,6 +72,7 @@ const getProducts = async (req: Request, res: Response) => {
     });
   }
 };
+
 const getBrand = async (req: Request, res: Response) => {
   const { brand } = req.params;
 
