@@ -11,12 +11,12 @@ interface Pagination {
   limit: number;
   page: number;
 }
-
 interface GetProductParams {
   sortBy?: string;
   order?: "asc" | "desc";
   limit?: string;
   page?: string;
+  color?: string; // New property
 }
 
 // Helper function for pagination
@@ -37,31 +37,28 @@ const getProducts = async (req: Request, res: Response) => {
       category,
       minPrice,
       maxPrice,
+      color, // New property
     } = req.query as GetProductParams & {
       brand?: string;
       category?: string;
       minPrice?: string;
       maxPrice?: string;
     };
-
     const sortOrder = order === "desc" ? -1 : 1;
     const allowedSortFields = ["name", "price", "createdAt", "brand"];
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : "name";
-
     const { limit: limitNumber, page: pageNumber } = getPagination(limit, page);
     const sortOptions: any = { [sortField]: sortOrder };
-
     const filters: any = {};
     if (brand && brand !== "All") filters.brand = brand;
     if (category && category !== "All") filters.category = category;
     if (minPrice) filters.price = { ...filters.price, $gte: Number(minPrice) };
     if (maxPrice) filters.price = { ...filters.price, $lte: Number(maxPrice) };
-
+    if (color && color !== "All") filters.color = color; // New filter condition
     const products = await Product.find(filters)
       .sort(sortOptions)
       .limit(limitNumber)
       .skip((pageNumber - 1) * limitNumber);
-
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
