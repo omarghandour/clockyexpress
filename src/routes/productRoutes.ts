@@ -39,7 +39,8 @@ import {
   getSearch,
   isFavorite,
   getFavoriteProducts,
-  getBrand, // Add this
+  getBrand,
+  getUniqueFilters, // Add this
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -52,7 +53,7 @@ router.route("/featured").get(getFeatured);
 router.route("/newArrival").get(getNewArrivals);
 router.route("/gender").get(getGender);
 router.route("/dashboard").get(authMiddleware, getProducts);
-
+router.get("/unique-filters", getUniqueFilters);
 router
   .route("/:PID")
   .get(getProductById)

@@ -72,7 +72,29 @@ const getProducts = async (req: Request, res: Response) => {
     });
   }
 };
+const getUniqueFilters = async (req: Request, res: Response) => {
+  try {
+    const uniqueBrands = await Product.distinct("brand");
+    const uniqueCategories = await Product.distinct("category");
+    const uniqueCaseColors = await Product.distinct("caseColor");
+    const uniqueDialColors = await Product.distinct("dialColor");
 
+    res.json({
+      brands: uniqueBrands,
+      categories: uniqueCategories,
+      caseColors: uniqueCaseColors,
+      dialColors: uniqueDialColors,
+    });
+  } catch (error) {
+    console.error("Error fetching unique filters:", error);
+    res.status(500).json({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Server error while fetching unique filters",
+    });
+  }
+};
 const getBrand = async (req: Request, res: Response) => {
   const { brand } = req.params;
 
@@ -484,6 +506,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
 
 export {
   getProducts,
+  getUniqueFilters,
   getBrand,
   getSearch,
   getFeatured,
