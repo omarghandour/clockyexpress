@@ -40,7 +40,8 @@ import {
   isFavorite,
   getFavoriteProducts,
   getBrand,
-  getUniqueFilters, // Add this
+  getUniqueFilters,
+  getAllOrders, // Add this
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -63,6 +64,7 @@ router
 router.route("/cart/:id").get(cartProduct).post(addToCart);
 // checkouts
 router.route("/checkout").post(createCheckout);
+router.route("/orders").get(authMiddleware, getAllOrders);
 // Favorites
 router
   .route("/favorites/:id")
