@@ -397,12 +397,10 @@ const createCheckout = async (req: Request, res: Response) => {
 const getAllOrders = async (req: Request, res: Response) => {
   try {
     // Fetch all checkouts
-    const checkouts = await CheckOuts.find({});
-
+    const checkouts = await CheckOuts.find();
     if (!checkouts || checkouts.length === 0) {
       return res.status(404).json({ message: "No checkouts found" });
     }
-
     return res.status(200).json(checkouts);
   } catch (error) {
     console.error(error);

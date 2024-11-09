@@ -64,7 +64,7 @@ router
 router.route("/cart/:id").get(cartProduct).post(addToCart);
 // checkouts
 router.route("/checkout").post(createCheckout);
-router.route("/orders").get(authMiddleware, getAllOrders);
+router.route("/orders/all").get(authMiddleware, getAllOrders);
 // Favorites
 router
   .route("/favorites/:id")
