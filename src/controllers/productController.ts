@@ -262,7 +262,21 @@ const updateProduct = async (req: Request, res: Response) => {
         runValidators: true,
       }
     );
-    if (!updatedProduct) {
+    const updatedNewArrivals = await NewArrival.findByIdAndUpdate(
+      PID,
+      {
+        name,
+        price,
+        description,
+        countInStock,
+        img,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!updatedProduct && !updatedNewArrivals) {
       return res.status(404).json({ message: "Product not found" });
     }
     res.status(200).json(updatedProduct);
