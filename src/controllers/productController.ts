@@ -193,6 +193,7 @@ const addProduct = async (req: Request, res: Response) => {
       img,
       before,
       gender,
+      movmentType,
       caseColor,
       dialColor,
     } = req.body;
@@ -204,6 +205,7 @@ const addProduct = async (req: Request, res: Response) => {
       gender,
       caseColor,
       dialColor,
+      movmentType,
       description,
       countInStock,
       img,
@@ -215,6 +217,7 @@ const addProduct = async (req: Request, res: Response) => {
       gender,
       caseColor,
       dialColor,
+      movmentType,
       description,
       countInStock,
       img,
@@ -244,7 +247,18 @@ const removeProduct = async (req: Request, res: Response) => {
 };
 
 const updateProduct = async (req: Request, res: Response) => {
-  const { name, price, description, countInStock, img } = req.body;
+  const {
+    name,
+    price,
+    description,
+    countInStock,
+    img,
+    before,
+    gender,
+    movmentType,
+    caseColor,
+    dialColor,
+  } = req.body;
 
   try {
     const { PID } = req.params;
@@ -253,6 +267,11 @@ const updateProduct = async (req: Request, res: Response) => {
       {
         name,
         price,
+        before,
+        gender,
+        caseColor,
+        dialColor,
+        movmentType,
         description,
         countInStock,
         img,
@@ -267,6 +286,11 @@ const updateProduct = async (req: Request, res: Response) => {
       {
         name,
         price,
+        before,
+        gender,
+        caseColor,
+        dialColor,
+        movmentType,
         description,
         countInStock,
         img,
