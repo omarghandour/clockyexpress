@@ -15,6 +15,7 @@ interface IProduct extends Document {
   class: string;
   attachment: mongoose.Schema.Types.ObjectId[];
   img: string;
+  otherImages: [{ type: String }];
 }
 
 // Create the Product schema
@@ -38,6 +39,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     class: { type: String },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
     img: { type: String, required: true },
+    otherImages: [{ type: String }],
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt fields
