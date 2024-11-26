@@ -338,6 +338,8 @@ interface ICartProduct {
 }
 const addProductToCart = async (req: Request, res: Response) => {
   const { userId, productId, quantity } = req.body;
+  console.log(userId, productId, quantity);
+
   try {
     // Find the user's cart
     let cart = await Cart.findOne({ user: userId });
@@ -346,12 +348,7 @@ const addProductToCart = async (req: Request, res: Response) => {
       // If the cart doesn't exist, create a new cart for the user
       cart = new Cart({
         user: userId,
-        products: [
-          {
-            product: productId,
-            quantity,
-          },
-        ],
+        products: [],
       });
     }
 
@@ -372,7 +369,11 @@ const addProductToCart = async (req: Request, res: Response) => {
     await cart.save();
 
     res.status(200).json({ message: "Product added to cart successfully" });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "Failed to add product to cart" });
+  }
 };
 const addToCart = async (req: Request, res: Response) => {
   const { id } = req.params; // The user ID

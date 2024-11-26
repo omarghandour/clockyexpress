@@ -63,7 +63,7 @@ router
   .put(authMiddleware, updateProduct);
 // cart
 router.route("/cart/:id").get(cartProduct).post(addToCart);
-router.route("/cart/add").post(addProductToCart);
+router.route("/cart/add/one").post(addProductToCart);
 // checkouts
 router.route("/checkout").post(createCheckout);
 router.route("/orders/all").get(authMiddleware, getAllOrders);
