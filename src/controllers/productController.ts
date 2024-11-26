@@ -336,6 +336,44 @@ interface ICartProduct {
   product: string;
   quantity: number;
 }
+const addProductToCart = async (req: Request, res: Response) => {
+  const { userId, productId, quantity } = req.body;
+  try {
+    // Find the user's cart
+    let cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      // If the cart doesn't exist, create a new cart for the user
+      cart = new Cart({
+        user: userId,
+        products: [
+          {
+            product: productId,
+            quantity,
+          },
+        ],
+      });
+    }
+
+    // Check if the product already exists in the cart
+    const existingProductIndex = cart.products.findIndex(
+      (p) => p.product.toString() === productId
+    );
+
+    if (existingProductIndex > -1) {
+      // If the product exists, increase the quantity
+      cart.products[existingProductIndex].quantity += quantity;
+    } else {
+      // If the product doesn't exist, add it to the cart
+      cart.products.push({ product: productId, quantity });
+    }
+
+    // Save the updated cart
+    await cart.save();
+
+    res.status(200).json({ message: "Product added to cart successfully" });
+  } catch (error) {}
+};
 const addToCart = async (req: Request, res: Response) => {
   const { id } = req.params; // The user ID
   const { products } = req.body; // Array of products with product ID and quantity
@@ -395,34 +433,47 @@ const addToCart = async (req: Request, res: Response) => {
   }
 };
 //  checkout
+
 const createCheckout = async (req: Request, res: Response) => {
-  const { userId, products, totalPrice, paymentMethod, shippingAddress } =
-    req.body;
-  // console.log(userId, products, totalPrice, paymentMethod, shippingAddress);
+  const { userId, totalPrice, paymentMethod, shippingAddress } = req.body;
 
   try {
     // Validate required fields
-    if (!products || !totalPrice || !paymentMethod || !shippingAddress) {
+    if (!userId || !totalPrice || !paymentMethod || !shippingAddress) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Create the checkout object, conditionally including userId
+    // Fetch the user's cart
+    const userCart = await Cart.findOne({ user: userId }).populate(
+      "products.product"
+    );
+    if (!userCart || userCart.products.length === 0) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    // Extract products from the cart
+    const products: any = userCart.products.map((item: any) => ({
+      productId: item.product._id,
+      quantity: item.quantity,
+      price: item.product.price, // Assuming the product schema has a 'price' field
+    }));
+
+    // Create the checkout object
     const newCheckoutData: any = {
+      userId,
       products,
       totalPrice,
       paymentMethod,
       shippingAddress,
     };
 
-    if (userId && userId !== undefined && userId !== null) {
-      newCheckoutData.userId = userId;
-    }
-
     // Create a new checkout instance
     const newCheckout = new CheckOuts(newCheckoutData);
 
     // Save the checkout to the database
     const savedCheckout = await newCheckout.save();
+
+    await Cart.findOneAndUpdate({ user: userId }, { products: [] });
 
     res.status(201).json({
       message: "Checkout completed successfully",
@@ -569,6 +620,7 @@ export {
   removeProduct,
   updateProduct,
   cartProduct,
+  addProductToCart,
   addToCart,
   AddToFavorite,
   getFavoriteProducts,
