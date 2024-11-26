@@ -455,6 +455,7 @@ const createCheckout = async (req: Request, res: Response) => {
     // Extract products from the cart
     const products: any = userCart.products.map((item: any) => ({
       productId: item.product._id,
+      name: item.product.name,
       quantity: item.quantity,
       price: item.product.price, // Assuming the product schema has a 'price' field
     }));
