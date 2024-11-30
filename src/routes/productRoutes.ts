@@ -42,7 +42,8 @@ import {
   getBrand,
   getUniqueFilters,
   getAllOrders,
-  addProductToCart, // Add this
+  addProductToCart,
+  productQuantity, // Add this
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -62,7 +63,7 @@ router
   .delete(authMiddleware, removeProduct)
   .put(authMiddleware, updateProduct);
 // cart
-router.route("/cart/:id").get(cartProduct).post(addToCart);
+router.route("/cart/:id").get(cartProduct).post(addToCart).put(productQuantity);
 router.route("/cart/add/one").post(addProductToCart);
 // checkouts
 router.route("/checkout").post(createCheckout);

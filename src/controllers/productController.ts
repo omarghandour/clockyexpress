@@ -375,6 +375,50 @@ const addProductToCart = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to add product to cart" });
   }
 };
+
+const productQuantity = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { productId, change } = req.body;
+
+  try {
+    // Find the user's cart
+    let cart = await Cart.findOne({ user: id });
+    // console.log(cart);
+
+    if (!cart) {
+      // If the cart doesn't exist, return an empty array
+      return res.status(200).json([]);
+    }
+    // Find the product in the cart
+    const productIndex = cart.products.findIndex(
+      (p) => p.product.toString() === productId
+    );
+
+    if (productIndex === -1) {
+      // If the product doesn't exist, return an empty array
+      return res.status(200).json([]);
+    }
+
+    const product = cart.products[productIndex];
+
+    // Update the quantity
+    product.quantity += change;
+
+    if (product.quantity <= 0) {
+      // Remove the product if quantity is 0 or less
+      cart.products.splice(productIndex, 1);
+    }
+
+    // Save the updated cart
+    await cart.save();
+    res.status(200).json(cart.products);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "Failed to update product quantity" });
+  }
+};
+
 const addToCart = async (req: Request, res: Response) => {
   const { id } = req.params; // The user ID
   const { products } = req.body; // Array of products with product ID and quantity
@@ -622,6 +666,7 @@ export {
   removeProduct,
   updateProduct,
   cartProduct,
+  productQuantity,
   addProductToCart,
   addToCart,
   AddToFavorite,
