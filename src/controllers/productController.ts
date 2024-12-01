@@ -18,14 +18,36 @@ interface GetProductParams {
   caseColor?: string;
   dialColor?: string;
 }
+// {
+//   const totalProducts = await Product.countDocuments({});
+//   const totalUsers = await User.countDocuments({});
+//   const totalCarts = await Cart.countDocuments({});
+//   const totalFavorites = await Favorite.countDocuments({});
+//   const totalNewArrivals = await NewArrival.countDocuments({});
+//   const totalCheckouts = await CheckOuts.countDocuments({});
 
+//   res.json({
+//     totalProducts,
+//     totalUsers,
+//     totalCarts,
+//     totalFavorites,
+//     totalNewArrivals,
+//     totalCheckouts,
+//     totalPages: Math.ceil(totalProducts)
+//   });
+// }
 // Helper function for pagination
 const getPagination = (limit: string, page: string): any => {
   const limitNumber = Math.min(parseInt(limit, 10) || 10, 100);
   const pageNumber = parseInt(page, 10) || 1;
   return { limit: limitNumber, page: pageNumber };
 };
-
+const getProductsDashboard = async (req: Request, res: Response) => {
+  try {
+    const products = await Product.find();
+    res.status(200).json(products);
+  } catch (error) {}
+};
 const getProducts = async (req: Request, res: Response) => {
   try {
     const {
@@ -72,6 +94,7 @@ const getProducts = async (req: Request, res: Response) => {
     });
   }
 };
+
 const getUniqueFilters = async (req: Request, res: Response) => {
   try {
     const uniqueBrands = await Product.distinct("brand");
@@ -657,6 +680,7 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
 };
 
 export {
+  getProductsDashboard,
   getProducts,
   getUniqueFilters,
   getBrand,

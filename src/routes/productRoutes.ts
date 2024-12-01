@@ -43,7 +43,8 @@ import {
   getUniqueFilters,
   getAllOrders,
   addProductToCart,
-  productQuantity, // Add this
+  productQuantity,
+  getProductsDashboard, // Add this
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -55,7 +56,7 @@ router.route("/search").get(getSearch);
 router.route("/featured").get(getFeatured);
 router.route("/newArrival").get(getNewArrivals);
 router.route("/gender").get(getGender);
-router.route("/dashboard").get(authMiddleware, getProducts);
+router.route("/dashboard").get(authMiddleware, getProductsDashboard);
 router.get("/unique-filters", getUniqueFilters);
 router
   .route("/:PID")
