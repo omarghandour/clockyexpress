@@ -13,7 +13,11 @@ connectDB();
 const app = express();
 
 // Define allowed origins for CORS
-const allowedOrigins = ["https://www.clockyeg.com", "http://localhost:3000"];
+const allowedOrigins = [
+  "https://www.clockyeg.com",
+  "http://localhost:3000",
+  "https://clockyeg.netlify.app",
+];
 
 // Configure CORS options
 const corsOptions = {
