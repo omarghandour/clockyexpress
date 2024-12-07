@@ -418,7 +418,7 @@ const addToCartAll = async (req: Request, res: Response) => {
     }
 
     // Add all the products from the request body to the cart
-    cart.products.push(...products);
+    cart.products = products;
 
     // Save the updated cart
     await cart.save();
