@@ -402,7 +402,8 @@ const addProductToCart = async (req: Request, res: Response) => {
   }
 };
 const addToCartAll = async (req: Request, res: Response) => {
-  const { userId, cart: products } = req.body;
+  const { cart: products } = req.body;
+  const { userId } = req.params;
 
   try {
     // Find the user's cart
