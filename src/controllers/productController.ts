@@ -401,7 +401,34 @@ const addProductToCart = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to add product to cart" });
   }
 };
+const addToCartAll = async (req: Request, res: Response) => {
+  const { userId, cart: products } = req.body;
 
+  try {
+    // Find the user's cart
+    let cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      // If the cart doesn't exist, create a new cart for the user
+      cart = new Cart({
+        user: userId,
+        products: [],
+      });
+    }
+
+    // Add all the products from the request body to the cart
+    cart.products.push(...products);
+
+    // Save the updated cart
+    await cart.save();
+
+    res.status(200).json({ message: "Products added to cart successfully" });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "Failed to add products to cart" });
+  }
+};
 const productQuantity = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { productId, change } = req.body;
@@ -696,6 +723,7 @@ export {
   productQuantity,
   addProductToCart,
   addToCart,
+  addToCartAll,
   AddToFavorite,
   getFavoriteProducts,
   isFavorite,
