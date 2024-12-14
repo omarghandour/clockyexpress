@@ -41,6 +41,13 @@ const loginUser = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+    const token = generateToken(user._id as string);
+    res.cookie("token", token, {
+      httpOnly: true, // Prevent JavaScript access to the cookie
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      sameSite: "strict", // Prevent CSRF attacks
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expires in 7 days
+    });
 
     if (user) {
       res.json({
@@ -48,7 +55,7 @@ const loginUser = async (req: Request, res: Response) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
-        token: generateToken(user._id as string),
+        token: token,
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });
