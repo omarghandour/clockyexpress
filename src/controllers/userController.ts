@@ -44,7 +44,7 @@ const loginUser = async (req: Request, res: Response) => {
     const token = generateToken(user._id as string);
     res.cookie("token", token, {
       httpOnly: true, // Prevent JavaScript access to the cookie
-      secure: true, // Use secure cookies in production
+      secure: false, // Use secure cookies in production
       sameSite: "lax", // Prevent CSRF attacks
       // path: "/login", // Prevent
       // sameSite: 'lax', // Allow cross-site cookies for development
