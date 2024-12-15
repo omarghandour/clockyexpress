@@ -40,7 +40,7 @@ const corsOptions = {
 // app.use(cors(corsOptions));
 app.use(
   cors({
-    origin: "https://www.clockyeg.com/", // Replace with your frontend domain
+    origin: "https://clockyeg.com", // Replace with your frontend domain
     credentials: true, // Allow credentials (cookies)
   })
 );
