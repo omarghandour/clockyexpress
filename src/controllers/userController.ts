@@ -47,6 +47,7 @@ const loginUser = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === "production", // Secure cookies in production
       sameSite: process.env.NODE_ENV ? "none" : "lax", // Cross-domain cookies
       path: "/", // Cookie accessible across all routes
+      domain: "clockyeg.com",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
