@@ -706,7 +706,19 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to remove from favorites" });
   }
 };
-
+const getRatings = async (req: Request, res: Response) => {
+  const { id } = req.params; // Product ID
+  const authHeader = req.headers["authorization"]; // Get the 'Authorization' header
+  if (!authHeader) {
+    return res.status(401).json({ message: "Authorization header is missing" });
+  }
+  const token = authHeader.split(" ")[1]; // Extract the token from the 'Bearer token' format
+  if (!token) {
+    return res.status(401).json({ message: "Token is missing" });
+  }
+  console.log(token);
+  res.json({ message: "Token" }).status(200);
+};
 export {
   getProductsDashboard,
   getProducts,
@@ -731,4 +743,5 @@ export {
   RemoveFromFavorite,
   createCheckout,
   getAllOrders,
+  getRatings,
 };
