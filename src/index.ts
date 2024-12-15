@@ -14,7 +14,7 @@ const app = express();
 
 // Define allowed origins for CORS
 const allowedOrigins = [
-  "https://www.clockyeg.com",
+  "https://clockyeg.com",
   "http://localhost:3000",
   "https://clockyeg.netlify.app",
 ];
@@ -40,7 +40,7 @@ const corsOptions = {
 // app.use(cors(corsOptions));
 app.use(
   cors({
-    origin: "https://clockyeg.com", // Replace with your frontend domain
+    origin: "*", // Replace with your frontend domain
     credentials: true, // Allow credentials (cookies)
   })
 );
