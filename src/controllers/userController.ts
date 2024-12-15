@@ -45,7 +45,7 @@ const loginUser = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true, // Prevent JavaScript access to the cookie
       secure: true, // Use secure cookies in production
-      sameSite: "strict", // Prevent CSRF attacks
+      sameSite: "none", // Prevent CSRF attacks
       path: "/", // Prevent
       domain: ".clockyeg.com", // Prevent
       // sameSite: "lax", // Allow cross-site cookies for development
