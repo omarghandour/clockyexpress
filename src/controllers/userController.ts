@@ -44,10 +44,10 @@ const loginUser = async (req: Request, res: Response) => {
     const token = generateToken(user._id as string);
     res.cookie("token", token, {
       httpOnly: true, // Prevent JavaScript access to the cookie
-      // secure: true, // Use secure cookies in production
+      secure: true, // Use secure cookies in production
       // sameSite: "none", // Prevent CSRF attacks
       // path: "/login", // Prevent
-      // sameSite: 'lax', // Allow cross-site cookies for development
+      sameSite: "lax", // Allow cross-site cookies for development
       maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expires in 7 days
     });
 
