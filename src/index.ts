@@ -32,18 +32,12 @@ const corsOptions = {
     }
   },
   methods: "GET,POST,OPTIONS,PUT,DELETE,PATCH", // Specify allowed methods
-  // allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
+  allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
   credentials: true, // Allow credentials (cookies, authorization headers)
 };
 
 // Enable CORS with the specified options
-// app.use(cors(corsOptions));
-app.use(
-  cors({
-    origin: "*", // Replace with your frontend domain
-    credentials: true, // Allow credentials (cookies)
-  })
-);
+app.use(cors(corsOptions));
 
 // Swagger setup
 const swaggerDefinition = {
