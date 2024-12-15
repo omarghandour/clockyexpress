@@ -37,7 +37,13 @@ const corsOptions = {
 };
 
 // Enable CORS with the specified options
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "https://www.clockyeg.com/", // Replace with your frontend domain
+    credentials: true, // Allow credentials (cookies)
+  })
+);
 
 // Swagger setup
 const swaggerDefinition = {
