@@ -45,7 +45,7 @@ const loginUser = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true, // Prevent JavaScript access to the cookie
       secure: true, // Use secure cookies in production
-      // sameSite: "lax", // Prevent CSRF attacks
+      sameSite: "none", // Prevent CSRF attacks
       // path: "/login", // Prevent
       // sameSite: 'lax', // Allow cross-site cookies for development
       maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expires in 7 days
