@@ -5,6 +5,9 @@ import User from "../models/user";
 import Favorite from "../models/AddToFavorite";
 import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
+import jwt from "jsonwebtoken";
+import Ratings from "../models/Ratings";
+
 // import Cart from "../models/Cart";
 interface GetProductParams {
   sortBy?: string;
@@ -706,19 +709,119 @@ const RemoveFromFavorite = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to remove from favorites" });
   }
 };
-const getRatings = async (req: Request, res: Response) => {
+const getUserRating = async (req: Request, res: Response) => {
   const { id } = req.params; // Product ID
-  const authHeader = req.headers["authorization"]; // Get the 'Authorization' header
+  const authHeader = req.headers.cookie; // Get the 'Authorization' header
   if (!authHeader) {
     return res.status(401).json({ message: "Authorization header is missing" });
   }
-  const token = authHeader.split(" ")[1]; // Extract the token from the 'Bearer token' format
+  // console.log(authHeader);
+
+  const token = authHeader.split("=")[1]; // Extract the token from the 'Bearer token' format
   if (!token) {
     return res.status(401).json({ message: "Token is missing" });
   }
-  console.log(token);
-  res.json({ message: "Token" }).status(200);
+  // console.log(token);
+  // Validate the token using the JWT secret
+  const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+  if (!decoded) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+  // Fetch the rating from Ratings Schema
+  try {
+    const rating = await Ratings.findOne({ product: id, user: decoded.id });
+    if (!rating) {
+      return res.status(404).json({ message: "No rating found" });
+    }
+    return res.status(200).json({ rating });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
+const getRatings = async (req: Request, res: Response) => {
+  const { id } = req.params; // Product ID
+  const authHeader = req.headers.cookie; // Get the 'Authorization' header
+  if (!authHeader) {
+    return res.status(401).json({ message: "Authorization header is missing" });
+  }
+  // console.log(authHeader);
+
+  const token = authHeader.split("=")[1]; // Extract the token from the 'Bearer token' format
+  if (!token) {
+    return res.status(401).json({ message: "Token is missing" });
+  }
+  // console.log(token);
+  // Validate the token using the JWT secret
+  const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+  if (!decoded) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+  // Fetch the ratings from Ratings Schema
+  try {
+    const ratings = await Ratings.find({ product: id });
+    if (!ratings || ratings.length === 0) {
+      return res.status(404).json({ message: "No ratings found" });
+    }
+    // calculate the averageRating
+    const sumRatings = ratings.reduce((acc, curr) => acc + curr.rating, 0);
+    const averageRating = sumRatings / ratings.length;
+    return res.status(200).json({ ratings: ratings, averageRating });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+const addRatings = async (req: Request, res: Response) => {
+  const { id } = req.params; // Product ID
+  const authHeader = req.headers.cookie; // Get the 'Authorization' header
+  if (!authHeader) {
+    return res.status(401).json({ message: "Authorization header is missing" });
+  }
+  // console.log(authHeader);
+
+  const token = authHeader.split("=")[1]; // Extract the token from the 'Bearer token' format
+  if (!token) {
+    return res.status(401).json({ message: "Token is missing" });
+  }
+  // console.log(token);
+  // Validate the token using the JWT secret
+  const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+  if (!decoded) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+  const { rating } = req.body; // Rating and review data
+  if (!rating || rating === undefined || rating === null) {
+    return res.status(400).json({ message: "Rating is required" });
+  }
+  const PID = decoded?.id;
+  try {
+    // Check if the product already has a rating by the user
+    const existingRating = await Ratings.findOne({
+      product: id,
+      user: PID,
+    });
+    if (existingRating) {
+      existingRating.rating = rating;
+      await existingRating.save();
+      return res.status(200).json({ message: "Rating updated successfully" });
+    }
+    // Create a new rating document
+    const newRating = new Ratings({
+      product: id,
+      user: PID,
+      rating,
+      review: req.body.review,
+    });
+    // Save the rating document
+    await newRating.save();
+    return res.status(200).json({ message: "Rating added successfully" });
+  } catch (error) {
+    console.error("Failed to add rating:", error);
+    return res.status(500).json({ message: "Failed to add rating" });
+  }
+};
+
 export {
   getProductsDashboard,
   getProducts,
@@ -744,4 +847,6 @@ export {
   createCheckout,
   getAllOrders,
   getRatings,
+  addRatings,
+  getUserRating,
 };

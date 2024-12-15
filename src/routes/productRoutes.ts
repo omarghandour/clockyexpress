@@ -45,7 +45,10 @@ import {
   addProductToCart,
   productQuantity,
   getProductsDashboard,
-  addToCartAll, // Add this
+  addToCartAll,
+  getRatings,
+  addRatings,
+  getUserRating, // Add this
 } from "../controllers/productController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -77,6 +80,8 @@ router
   .post(AddToFavorite)
   .delete(RemoveFromFavorite)
   .get(authMiddleware, getFavoriteProducts); // Use the new getFavoriteProducts function here
-
+// ratings
+router.route("/:id/ratings").get(getRatings).patch(addRatings);
+router.route("/:id/rating").get(getUserRating);
 router.route("/isFavorite/:id").post(isFavorite);
 export default router;
