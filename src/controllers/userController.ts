@@ -46,8 +46,8 @@ const loginUser = async (req: Request, res: Response) => {
       httpOnly: true, // Prevent JavaScript access to the cookie
       secure: true, // Use secure cookies in production
       sameSite: "strict", // Prevent CSRF attacks
-      // path: "/", // Prevent
-      // domain: "https://www.clockyeg.com", // Prevent
+      path: "/", // Prevent
+      domain: "https://www.clockyeg.com", // Prevent
       // sameSite: "lax", // Allow cross-site cookies for development
       maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expires in 7 days
     });
