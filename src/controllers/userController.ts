@@ -45,7 +45,7 @@ const loginUser = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true, // Prevent JavaScript access
       secure: process.env.NODE_ENV === "production", // Secure cookies in production
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       path: "/", // Cookie accessible across all routes
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
