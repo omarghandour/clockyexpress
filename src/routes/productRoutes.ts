@@ -68,7 +68,11 @@ router
   .delete(authMiddleware, removeProduct)
   .put(authMiddleware, updateProduct);
 // cart
-router.route("/cart/:id").get(cartProduct).post(addToCart).put(productQuantity);
+router
+  .route("/cart/:id")
+  .get(authMiddleware, cartProduct)
+  .post(addToCart)
+  .put(productQuantity);
 router.route("/cart/add/one").post(addProductToCart);
 router.route("/cart/all/:id").post(addToCartAll);
 // checkouts
