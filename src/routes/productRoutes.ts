@@ -50,7 +50,10 @@ import {
   addRatings,
   getUserRating, // Add this
 } from "../controllers/productController";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import {
+  authMiddleware,
+  cookieMiddleware,
+} from "../middlewares/authMiddleware";
 
 const router = Router();
 
@@ -68,7 +71,11 @@ router
   .delete(authMiddleware, removeProduct)
   .put(authMiddleware, updateProduct);
 // cart
-router.route("/cart/:id").get(cartProduct).post(addToCart).put(productQuantity);
+router
+  .route("/cart/:id")
+  .get(cookieMiddleware, cartProduct)
+  .post(cookieMiddleware, addToCart)
+  .put(cookieMiddleware, productQuantity);
 router.route("/cart/add/one").post(addProductToCart);
 router.route("/cart/all/:id").post(addToCartAll);
 // checkouts

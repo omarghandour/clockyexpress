@@ -341,6 +341,7 @@ const updateProduct = async (req: Request, res: Response) => {
 // cart
 const cartProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
+
   try {
     // Find the cart for the user and populate the product details
     let cart = await Cart.findOne({ user: id }).populate("products.product");
@@ -741,23 +742,6 @@ const getUserRating = async (req: Request, res: Response) => {
 };
 const getRatings = async (req: Request, res: Response) => {
   const { id } = req.params; // Product ID
-  const authHeader = req.headers.cookie; // Get the 'Authorization' header
-  if (!authHeader) {
-    return res.status(401).json({ message: "Authorization header is missing" });
-  }
-  // console.log(authHeader);
-
-  const token = authHeader.split("=")[1]; // Extract the token from the 'Bearer token' format
-  if (!token) {
-    return res.status(401).json({ message: "Token is missing" });
-  }
-  // console.log(token);
-  // Validate the token using the JWT secret
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-  if (!decoded) {
-    return res.status(401).json({ message: "Invalid token" });
-  }
-  // Fetch the ratings from Ratings Schema
   try {
     const ratings = await Ratings.find({ product: id });
     if (!ratings || ratings.length === 0) {

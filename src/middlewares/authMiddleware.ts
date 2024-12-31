@@ -43,5 +43,26 @@ const authMiddleware = async (
     res.status(401).json({ message: "Not authorized, no token" });
   }
 };
+const cookieMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.cookie;
+  if (!authHeader) {
+    return next();
+  }
+  const token = authHeader.split("=")[1];
 
-export { authMiddleware };
+  if (!token) {
+    return next();
+  }
+  jwt.verify(token, process.env.JWT_SECRET!, (err, _) => {
+    if (err) {
+      return next();
+    }
+    next();
+  });
+};
+
+export { authMiddleware, cookieMiddleware };
