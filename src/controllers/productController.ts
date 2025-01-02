@@ -306,32 +306,33 @@ const updateProduct = async (req: Request, res: Response) => {
         description,
         countInStock,
         img,
+        otherImages: req.body.images,
       },
       {
         new: true,
         runValidators: true,
       }
     );
-    const updatedNewArrivals = await NewArrival.findByIdAndUpdate(
-      PID,
-      {
-        name,
-        price,
-        before,
-        gender,
-        caseColor,
-        dialColor,
-        movmentType,
-        description,
-        countInStock,
-        img,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-    if (!updatedProduct && !updatedNewArrivals) {
+    // const updatedNewArrivals = await NewArrival.findByIdAndUpdate(
+    //   PID,
+    //   {
+    //     name,
+    //     price,
+    //     before,
+    //     gender,
+    //     caseColor,
+    //     dialColor,
+    //     movmentType,
+    //     description,
+    //     countInStock,
+    //     img,
+    //   },
+    //   {
+    //     new: true,
+    //     runValidators: true,
+    //   }
+    // );
+    if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
     res.status(200).json(updatedProduct);
