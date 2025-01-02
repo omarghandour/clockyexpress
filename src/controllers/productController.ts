@@ -220,13 +220,14 @@ const addProduct = async (req: Request, res: Response) => {
       description,
       countInStock,
       img,
+      images,
       before,
       gender,
       movmentType,
       caseColor,
       dialColor,
     } = req.body;
-    // console.log(req.body);
+    console.log(req.body);
 
     const product = new Product({
       name,
@@ -239,22 +240,23 @@ const addProduct = async (req: Request, res: Response) => {
       description,
       countInStock,
       img,
+      images,
     });
-    const newArrival = new NewArrival({
-      name,
-      price,
-      before,
-      gender,
-      caseColor,
-      dialColor,
-      movmentType,
-      description,
-      countInStock,
-      img,
-    });
+    // const newArrival = new NewArrival({
+    //   name,
+    //   price,
+    //   before,
+    //   gender,
+    //   caseColor,
+    //   dialColor,
+    //   movmentType,
+    //   description,
+    //   countInStock,
+    //   img,
+    // });
     const createdProduct = await product.save();
-    const newArrivaled = await newArrival.save();
-    res.status(201).json({ products: createdProduct, new: newArrivaled });
+    // const newArrivaled = await newArrival.save();
+    res.status(201).json({ products: createdProduct });
   } catch (error) {
     console.log(error);
 
