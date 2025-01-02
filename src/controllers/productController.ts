@@ -240,7 +240,7 @@ const addProduct = async (req: Request, res: Response) => {
       description,
       countInStock,
       img,
-      images,
+      otherImages: images,
     });
     // const newArrival = new NewArrival({
     //   name,
