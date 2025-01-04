@@ -580,6 +580,15 @@ const createCheckout = async (req: Request, res: Response) => {
     // Save the checkout to the database
     const savedCheckout = await newCheckout.save();
 
+    // Lower the product quantities
+    for (const item of userCart.products) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.countInStock -= item.quantity;
+        await product.save();
+      }
+    }
+
     await Cart.findOneAndUpdate({ user: userId }, { products: [] });
 
     res.status(201).json({
