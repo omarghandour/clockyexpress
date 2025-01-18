@@ -82,7 +82,7 @@ router.route("/cart/all/:id").post(addToCartAll);
 // checkouts
 router.route("/checkout").post(createCheckout);
 router.route("/orders/all").get(authMiddleware, getAllOrders);
-router.route("/orders/:id").put(orderStatusUpdate);
+router.route("/orders/:id").put(authMiddleware, orderStatusUpdate);
 // Favorites
 router
   .route("/favorites/:id")
