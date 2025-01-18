@@ -48,7 +48,8 @@ import {
   addToCartAll,
   getRatings,
   addRatings,
-  getUserRating, // Add this
+  getUserRating,
+  orderStatusUpdate, // Add this
 } from "../controllers/productController";
 import {
   authMiddleware,
@@ -81,6 +82,7 @@ router.route("/cart/all/:id").post(addToCartAll);
 // checkouts
 router.route("/checkout").post(createCheckout);
 router.route("/orders/all").get(authMiddleware, getAllOrders);
+router.route("/orders/:id").put(orderStatusUpdate);
 // Favorites
 router
   .route("/favorites/:id")

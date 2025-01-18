@@ -56,7 +56,7 @@ const CheckoutSchema: Schema = new Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "Completed", "Cancelled"],
+      enum: ["Pending", "Shipped", "Delivered", "Cancelled"],
       default: "Pending",
     },
     shippingAddress: {

@@ -613,6 +613,28 @@ const getAllOrders = async (req: Request, res: Response) => {
     return res.status(500).json({ message: `Internal server error: ${error}` });
   }
 };
+const orderStatusUpdate = async (req: Request, res: Response) => {
+  const { status } = req.body;
+  const { id } = req.params;
+  // console.log(status, id);
+  try {
+    // Find the checkout with the given ID
+    const checkout = await CheckOuts.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!checkout) {
+      return res.status(404).json({ message: "Checkout not found" });
+    }
+
+    return res.status(200).json(checkout);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 // Controller to fetch favorite products
 const getFavoriteProducts = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -842,6 +864,7 @@ export {
   RemoveFromFavorite,
   createCheckout,
   getAllOrders,
+  orderStatusUpdate,
   getRatings,
   addRatings,
   getUserRating,
