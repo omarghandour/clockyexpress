@@ -10,10 +10,17 @@ interface IProduct extends Document {
   gender: string;
   brand: string;
   caseColor: string;
+  caseSize: string;
+  faceMaterial: string;
+  features: string;
+  modelNumber: string;
+  brandClosure: string;
+  faceDialShape: string;
+  faceDialType: string;
   dialColor: string;
   movmentType: string;
-  class: string;
-  attachment: mongoose.Schema.Types.ObjectId[];
+  productClass: string;
+  // attachment: mongoose.Schema.Types.ObjectId[];
   img: string;
   otherImages: [{ type: String }];
 }
@@ -28,15 +35,22 @@ const ProductSchema: Schema<IProduct> = new Schema(
     gender: { type: String, enum: ["men", "women", "unisex"] },
     brand: { type: String, trim: true },
     caseColor: { type: String },
+    caseSize: { type: String, trim: true },
+    faceMaterial: { type: String, trim: true },
+    modelNumber: { type: String, trim: true },
+    faceDialShape: { type: String, trim: true },
+    faceDialType: { type: String, trim: true },
+    brandClosure: { type: String, trim: true },
+    features: { type: String, trim: true },
     dialColor: { type: String },
     movmentType: { type: String, enum: ["automatic", "quartz"] },
-    attachment: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "File",
-      },
-    ],
-    class: { type: String },
+    // attachment: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "File",
+    //   },
+    // ],
+    productClass: { type: String },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
     img: { type: String, required: true },
     otherImages: [{ type: String }],

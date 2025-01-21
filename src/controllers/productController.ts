@@ -158,7 +158,7 @@ const getSearch = async (req: Request, res: Response) => {
 };
 const getFeatured = async (req: Request, res: Response) => {
   try {
-    const featuredProducts = await Product.find({ class: "Featured" });
+    const featuredProducts = await Product.find({ productClass: "Featured" });
     res.status(200).json(featuredProducts);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve featured products" });
@@ -226,7 +226,17 @@ const addProduct = async (req: Request, res: Response) => {
       movmentType,
       caseColor,
       dialColor,
+      brand,
+      caseSize,
+      faceMaterial,
+      features,
+      modelNumber,
+      brandClosure,
+      faceDialShape,
+      faceDialType,
+      productClass,
     } = req.body;
+
     console.log(req.body);
 
     const product = new Product({
@@ -241,25 +251,21 @@ const addProduct = async (req: Request, res: Response) => {
       countInStock,
       img,
       otherImages: images,
+      brand,
+      caseSize,
+      faceMaterial,
+      features,
+      modelNumber,
+      brandClosure,
+      faceDialShape,
+      faceDialType,
+      class: productClass,
     });
-    // const newArrival = new NewArrival({
-    //   name,
-    //   price,
-    //   before,
-    //   gender,
-    //   caseColor,
-    //   dialColor,
-    //   movmentType,
-    //   description,
-    //   countInStock,
-    //   img,
-    // });
+
     const createdProduct = await product.save();
-    // const newArrivaled = await newArrival.save();
     res.status(201).json({ products: createdProduct });
   } catch (error) {
     console.log(error);
-
     res.status(500).json({ message: "Failed to add product" });
   }
 };
@@ -289,6 +295,15 @@ const updateProduct = async (req: Request, res: Response) => {
     movmentType,
     caseColor,
     dialColor,
+    brand,
+    caseSize,
+    faceMaterial,
+    features,
+    modelNumber,
+    brandClosure,
+    faceDialShape,
+    faceDialType,
+    productClass,
   } = req.body;
 
   try {
@@ -307,31 +322,23 @@ const updateProduct = async (req: Request, res: Response) => {
         countInStock,
         img,
         otherImages: req.body.images,
+        brand,
+        caseSize,
+        faceMaterial,
+        features,
+        modelNumber,
+        brandClosure,
+        faceDialShape,
+        faceDialType,
+        productClass,
+        // attachment,
       },
       {
         new: true,
         runValidators: true,
       }
     );
-    // const updatedNewArrivals = await NewArrival.findByIdAndUpdate(
-    //   PID,
-    //   {
-    //     name,
-    //     price,
-    //     before,
-    //     gender,
-    //     caseColor,
-    //     dialColor,
-    //     movmentType,
-    //     description,
-    //     countInStock,
-    //     img,
-    //   },
-    //   {
-    //     new: true,
-    //     runValidators: true,
-    //   }
-    // );
+
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
