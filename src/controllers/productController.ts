@@ -259,7 +259,7 @@ const addProduct = async (req: Request, res: Response) => {
       brandClosure,
       faceDialShape,
       faceDialType,
-      class: productClass,
+      productClass,
     });
 
     const createdProduct = await product.save();
