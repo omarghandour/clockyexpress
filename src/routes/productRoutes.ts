@@ -88,7 +88,7 @@ router
   .route("/favorites/:id")
   .post(AddToFavorite)
   .delete(RemoveFromFavorite)
-  .get(authMiddleware, getFavoriteProducts); // Use the new getFavoriteProducts function here
+  .get(getFavoriteProducts); // Use the new getFavoriteProducts function here
 // ratings
 router.route("/:id/ratings").get(getRatings).patch(addRatings);
 router.route("/:id/rating").get(getUserRating);

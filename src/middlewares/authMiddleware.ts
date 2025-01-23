@@ -24,7 +24,7 @@ const authMiddleware = async (
 
       // Check if the user is an admin
       // && req.user.isAdmin
-      if (req.user) {
+      if (req.user && req.user.isAdmin) {
         // console.log("User is admin");
         next();
       } else {
