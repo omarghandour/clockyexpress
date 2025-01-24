@@ -237,8 +237,6 @@ const addProduct = async (req: Request, res: Response) => {
       productClass,
     } = req.body;
 
-    console.log(req.body);
-
     const product = new Product({
       name,
       price,
@@ -353,22 +351,50 @@ const cartProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    // Find the cart for the user and populate the product details
-    let cart = await Cart.findOne({ user: id }).populate("products.product");
+    // Find the cart with populated products
+    let cart = await Cart.findOne({ user: id }).populate({
+      path: "products.product",
+      model: "Product", // Explicitly specify the model for safety
+    });
 
+    // Create new cart if none exists
     if (!cart) {
-      // make an empty cart
-      const newCart = new Cart({ user: id });
+      const newCart = new Cart({ user: id, products: [] });
       await newCart.save();
-      cart = newCart;
+      return res.status(200).json(newCart.products);
     }
 
-    // Return the populated products in the cart
-    res.status(200).json(cart.products);
+    // Track original length for cleanup reporting
+    const originalProductCount = cart.products.length;
+
+    // Filter out products with missing/null product references
+    cart.products = cart.products.filter(
+      (item: any) => item.product && item.product._id && !item.product.deletedAt
+    );
+
+    // Check if we need to update the cart
+    if (cart.products.length !== originalProductCount) {
+      await cart.save();
+    }
+
+    // Convert to plain object and remove internal version key
+    const responseProducts = cart.products.map((product: any) => {
+      const pojo = product;
+      delete pojo.__v;
+      return pojo;
+    });
+    // console.log(cleanupPerformed);
+
+    res.status(200).json({
+      products: responseProducts,
+      cleanupPerformed: originalProductCount !== cart.products.length,
+      removedItems: originalProductCount - cart.products.length,
+    });
   } catch (error: any) {
+    console.error(`Cart retrieval error for user ${id}:`, error);
     res.status(500).json({
-      message: "Failed to retrieve products in cart",
-      error: error.message,
+      message: "Failed to retrieve cart products",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -378,7 +404,6 @@ interface ICartProduct {
 }
 const addProductToCart = async (req: Request, res: Response) => {
   const { userId, productId, quantity } = req.body;
-  console.log(userId, productId, quantity);
 
   try {
     // Find the user's cart
@@ -420,28 +445,56 @@ const addToCartAll = async (req: Request, res: Response) => {
   const { id: userId } = req.params;
 
   try {
-    // Find the user's cart
+    // Validate products array format
+    if (!Array.isArray(products)) {
+      return res.status(400).json({ message: "Invalid products data format" });
+    }
+
+    // Initial filter for invalid products in the request
+    const validRequestProducts = products.filter(
+      (p) => p != null && p.product != null && p.product._id != null
+    );
+
+    // Extract product IDs from valid products
+    const productIds = validRequestProducts.map((p) => p.product._id);
+
+    // Find existing products in database
+    const existingProducts = await Product.find({
+      _id: { $in: productIds },
+    });
+
+    // Create lookup set of valid product IDs
+    const validProductIds = new Set(
+      existingProducts.map((p: any) => p._id.toString())
+    );
+
+    // Final filter of products that exist in database
+    const validCartProducts = validRequestProducts.filter((p) =>
+      validProductIds.has(p.product._id.toString())
+    );
+
+    // Find or create user's cart
     let cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
-      // If the cart doesn't exist, create a new cart for the user
       cart = new Cart({
         user: userId,
-        products: [],
+        products: validCartProducts,
       });
+    } else {
+      // Replace existing cart products with validated ones
+      cart.products = validCartProducts;
     }
 
-    // Add all the products from the request body to the cart
-    cart.products = products;
-
-    // Save the updated cart
     await cart.save();
 
-    res.status(200).json({ message: "Products added to cart successfully" });
+    res.status(200).json({
+      message: "Cart updated successfully",
+      removedCount: products.length - validCartProducts.length,
+    });
   } catch (error) {
-    console.log(error);
-
-    res.status(500).json({ message: "Failed to add products to cart" });
+    console.error("Cart update error:", error);
+    res.status(500).json({ message: "Failed to update cart" });
   }
 };
 const productQuantity = async (req: Request, res: Response) => {
@@ -710,8 +763,6 @@ const isFavorite = async (req: Request, res: Response) => {
       products: ProductId,
     });
     if (favorite) {
-      console.log(favorite);
-
       res.status(200).json({ isFavorite: true });
     } else {
       res.status(200).json({ isFavorite: false });
