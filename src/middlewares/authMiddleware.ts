@@ -20,11 +20,11 @@ const authMiddleware = async (
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-      req.user = await User.findById((decoded as any).id).select("-password");
+      const user = await User.findById((decoded as any).id).select("-password");
 
       // Check if the user is an admin
       // && req.user.isAdmin
-      if (req.user && req.user.isAdmin) {
+      if (user && user.isAdmin) {
         // console.log("User is admin");
         next();
       } else {
