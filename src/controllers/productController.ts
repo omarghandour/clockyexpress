@@ -662,8 +662,8 @@ const createCheckout = async (req: Request, res: Response) => {
 };
 const getAllOrders = async (req: Request, res: Response) => {
   try {
-    // Fetch all checkouts
-    const checkouts = await CheckOuts.find();
+    // Fetch all checkouts sorted by latest order
+    const checkouts = await CheckOuts.find().sort({ createdAt: -1 });
     if (!checkouts || checkouts.length === 0) {
       return res.status(404).json({ message: "No checkouts found" });
     }
