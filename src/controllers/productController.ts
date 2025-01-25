@@ -128,9 +128,8 @@ const getBrand = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Invalid brand provided" });
   }
 
-  const LowerCaseBrand = brand.toLowerCase();
   try {
-    const products = await Product.find({ brand: LowerCaseBrand });
+    const products = await Product.find({ brand });
     res.status(200).json(products);
   } catch (error: any) {
     console.log(error.message);
