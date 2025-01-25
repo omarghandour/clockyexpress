@@ -128,8 +128,9 @@ const getBrand = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Invalid brand provided" });
   }
 
+  const LowerCaseBrand = brand.toLowerCase();
   try {
-    const products = await Product.find({ brand });
+    const products = await Product.find({ brand: LowerCaseBrand });
     res.status(200).json(products);
   } catch (error: any) {
     console.log(error.message);
@@ -662,8 +663,8 @@ const createCheckout = async (req: Request, res: Response) => {
 };
 const getAllOrders = async (req: Request, res: Response) => {
   try {
-    // Fetch all checkouts sorted by latest order
-    const checkouts = await CheckOuts.find().sort({ createdAt: -1 });
+    // Fetch all checkouts
+    const checkouts = await CheckOuts.find();
     if (!checkouts || checkouts.length === 0) {
       return res.status(404).json({ message: "No checkouts found" });
     }
