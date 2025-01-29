@@ -265,7 +265,7 @@ const addProduct = async (req: Request, res: Response) => {
       productClass,
       dialType,
       Bracelet,
-      waterResistance,
+      waterResistance: waterResistance === "on" ? true : false,
       caseShape,
       Guarantee,
     });
@@ -346,7 +346,7 @@ const updateProduct = async (req: Request, res: Response) => {
         productClass,
         dialType,
         Bracelet,
-        waterResistance,
+        waterResistance: waterResistance === "on" ? true : false,
         caseShape,
         Guarantee,
         // attachment,
