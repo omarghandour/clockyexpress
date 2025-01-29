@@ -11,7 +11,7 @@ interface IProduct extends Document {
   brand: string;
   caseColor: string;
   caseSize: string;
-  faceMaterial: string;
+  caseMaterial: string;
   features: string;
   modelNumber: string;
   brandClosure: string;
@@ -20,6 +20,11 @@ interface IProduct extends Document {
   dialColor: string;
   movmentType: string;
   productClass: string;
+  dialType: string;
+  Bracelet: string;
+  waterResistance: boolean;
+  caseShape: string;
+  Guarantee: string;
   // attachment: mongoose.Schema.Types.ObjectId[];
   img: string;
   otherImages: [{ type: String }];
@@ -36,23 +41,22 @@ const ProductSchema: Schema<IProduct> = new Schema(
     brand: { type: String, trim: true },
     caseColor: { type: String },
     caseSize: { type: String, trim: true },
-    faceMaterial: { type: String, trim: true },
+    caseMaterial: { type: String, trim: true },
     modelNumber: { type: String, trim: true },
     faceDialShape: { type: String, trim: true },
     faceDialType: { type: String, trim: true },
     brandClosure: { type: String, trim: true },
     features: { type: String, trim: true },
     dialColor: { type: String },
+    dialType: { type: String, trim: true },
+    Bracelet: { type: String, trim: true },
     movmentType: { type: String, enum: ["automatic", "quartz"] },
-    // attachment: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "File",
-    //   },
-    // ],
     productClass: { type: String },
     countInStock: { type: Number, required: true, default: 0, min: 0 },
     img: { type: String, required: true },
+    waterResistance: { type: Boolean, default: false },
+    caseShape: { type: String, trim: true },
+    Guarantee: { type: String, trim: true },
     otherImages: [{ type: String }],
   },
   {
