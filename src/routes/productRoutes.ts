@@ -98,5 +98,8 @@ router.route("/:id/rating").get(getUserRating);
 router.route("/isFavorite/:id").post(isFavorite);
 export default router;
 // coupon codes
-router.route("/coupon/code").post(addCouponCode).get(checkCouponCode);
+router
+  .route("/coupon/code")
+  .post(authMiddleware, addCouponCode)
+  .get(checkCouponCode);
 router.route("/coupon/:code").put(disableOrEnableCouponCode);

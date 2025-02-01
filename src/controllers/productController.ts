@@ -721,7 +721,7 @@ const createCheckout = async (req: Request, res: Response) => {
 const getAllOrders = async (req: Request, res: Response) => {
   try {
     // Fetch all checkouts
-    const checkouts = await CheckOuts.find();
+    const checkouts = await CheckOuts.find().sort({ createdAt: -1 });
     if (!checkouts || checkouts.length === 0) {
       return res.status(404).json({ message: "No checkouts found" });
     }
@@ -987,8 +987,6 @@ const disableOrEnableCouponCode = async (req: Request, res: Response) => {
 };
 const checkCouponCode = async (req: Request, res: Response) => {
   const { code } = req.query;
-  console.log(code);
-
   const couponCode = await Coupon.findOne({ code });
   if (!couponCode || !couponCode.valid) {
     return res
