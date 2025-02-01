@@ -49,7 +49,10 @@ import {
   getRatings,
   addRatings,
   getUserRating,
-  orderStatusUpdate, // Add this
+  orderStatusUpdate,
+  addCouponCode,
+  disableOrEnableCouponCode,
+  checkCouponCode, // Add this
 } from "../controllers/productController";
 import {
   authMiddleware,
@@ -94,3 +97,6 @@ router.route("/:id/ratings").get(getRatings).patch(addRatings);
 router.route("/:id/rating").get(getUserRating);
 router.route("/isFavorite/:id").post(isFavorite);
 export default router;
+// coupon codes
+router.route("/coupon/code").post(addCouponCode).get(checkCouponCode);
+router.route("/coupon/:code").put(disableOrEnableCouponCode);

@@ -1,5 +1,6 @@
 // models/Checkout.ts
 import mongoose, { Document, Schema } from "mongoose";
+import { Coupon } from "./Coupon";
 
 interface ICheckout extends Document {
   userId?: string; // ID of the user making the purchase
@@ -58,6 +59,11 @@ const CheckoutSchema: Schema = new Schema(
       type: String,
       enum: ["Pending", "Shipped", "Delivered", "Cancelled"],
       default: "Pending",
+    },
+    couponCode: {
+      type: Schema.Types.ObjectId,
+      ref: "Coupon",
+      required: false,
     },
     shippingAddress: {
       fullName: { type: String, required: true },

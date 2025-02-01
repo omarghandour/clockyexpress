@@ -7,6 +7,7 @@ import NewArrival from "../models/NewArrival";
 import CheckOuts from "../models/CheckOuts";
 import jwt from "jsonwebtoken";
 import Ratings from "../models/Ratings";
+import { Coupon } from "../models/Coupon";
 
 // import Cart from "../models/Cart";
 interface GetProductParams {
@@ -621,11 +622,11 @@ const addToCart = async (req: Request, res: Response) => {
 //  checkout
 
 const createCheckout = async (req: Request, res: Response) => {
-  const { userId, totalPrice, paymentMethod, shippingAddress } = req.body;
+  const { userId, paymentMethod, shippingAddress, couponCode } = req.body;
 
   try {
     // Validate required fields
-    if (!userId || !totalPrice || !paymentMethod || !shippingAddress) {
+    if (!userId || !paymentMethod || !shippingAddress) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -635,6 +636,41 @@ const createCheckout = async (req: Request, res: Response) => {
     );
     if (!userCart || userCart.products.length === 0) {
       return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    // Calculate the total price based on the cart items
+    const totalPrice = userCart.products.reduce((sum: number, item: any) => {
+      return sum + item.product.price * item.quantity;
+    }, 0);
+
+    // Initialize the final total price
+    let finalTotalPrice = totalPrice;
+
+    // Validate and apply the coupon if provided
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (couponCode) {
+      if (!coupon) {
+        return res.status(404).json({ error: "Coupon not found" });
+      }
+
+      if (!coupon.valid) {
+        return res.status(400).json({ error: "Coupon is not valid" });
+      }
+
+      if (coupon.usedCount >= coupon.maxUsage) {
+        return res.status(400).json({ error: "Coupon usage limit exceeded" });
+      }
+
+      if (coupon.expiresAt && coupon.expiresAt < new Date()) {
+        return res.status(400).json({ error: "Coupon has expired" });
+      }
+
+      // Apply the discount to the total price
+      finalTotalPrice = totalPrice - (totalPrice * coupon.discount) / 100;
+
+      // Increment the coupon's used count
+      coupon.usedCount += 1;
+      await coupon.save();
     }
 
     // Extract products from the cart
@@ -649,9 +685,10 @@ const createCheckout = async (req: Request, res: Response) => {
     const newCheckoutData: any = {
       userId,
       products,
-      totalPrice,
+      totalPrice: finalTotalPrice + 100, // Use the discounted total price
       paymentMethod,
       shippingAddress,
+      couponCode: coupon?._id || null, // Include the coupon code in the checkout
     };
 
     // Create a new checkout instance
@@ -669,6 +706,7 @@ const createCheckout = async (req: Request, res: Response) => {
       }
     }
 
+    // Clear the user's cart
     await Cart.findOneAndUpdate({ user: userId }, { products: [] });
 
     res.status(201).json({
@@ -917,7 +955,55 @@ const addRatings = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Failed to add rating" });
   }
 };
+const addCouponCode = async (req: Request, res: Response) => {
+  try {
+    const { code, discount, maxUsage } = req.body;
+    const newCoupon = new Coupon({ code, discount, maxUsage, valid: true });
+    await newCoupon.save();
+    return res.status(200).json({ message: "Coupon code added successfully" });
+  } catch (error) {
+    console.error("Failed to add coupon code:", error);
+    return res.status(500).json({ message: "Failed to add coupon code" });
+  }
+};
+const disableOrEnableCouponCode = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const couponCode = await Coupon.findOne({ id: id });
+    if (!couponCode) {
+      return res.status(404).json({ message: "Coupon code not found" });
+    }
+    couponCode.valid = !couponCode.valid;
+    await couponCode.save();
+    return res.status(200).json({
+      message: `Coupon code ${couponCode.code} has been ${
+        couponCode.valid ? "enabled" : "disabled"
+      }`,
+    });
+  } catch (error) {
+    console.error("Failed to disable coupon code:", error);
+    return res.status(500).json({ message: "Failed to disable coupon code" });
+  }
+};
+const checkCouponCode = async (req: Request, res: Response) => {
+  const { code } = req.query;
+  console.log(code);
 
+  const couponCode = await Coupon.findOne({ code });
+  if (!couponCode || !couponCode.valid) {
+    return res
+      .status(404)
+      .json({ message: "Coupon code not found or expired" });
+  }
+  const codeValues = {
+    codeName: couponCode.code,
+    discount: couponCode.discount,
+    valid: couponCode.valid,
+  };
+  return res
+    .status(200)
+    .json({ code: codeValues, message: "Coupon code valid" });
+};
 export {
   getProductsDashboard,
   getProducts,
@@ -946,4 +1032,7 @@ export {
   getRatings,
   addRatings,
   getUserRating,
+  addCouponCode,
+  disableOrEnableCouponCode,
+  checkCouponCode,
 };
