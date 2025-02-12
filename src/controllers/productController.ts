@@ -66,6 +66,7 @@ const getProducts = async (req: Request, res: Response) => {
       caseColor,
       dialColor,
     } = req.query as GetProductParams;
+    console.log(minPrice, maxPrice);
 
     const sortOrder = order === "desc" ? -1 : 1;
     const allowedSortFields = ["name", "price", "createdAt", "brand"];
@@ -169,7 +170,7 @@ const getNewArrivals = async (req: Request, res: Response) => {
   try {
     const newArrivals = await Product.find()
       .sort({ createdAt: -1 }) // Sort by createdAt in descending order
-      .limit(5); // Limit the result to 5 items
+      .limit(10); // Limit the result to 5 items
     res.status(200).json(newArrivals);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve new arrivals" });
