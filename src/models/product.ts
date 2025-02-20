@@ -52,7 +52,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     Bracelet: { type: String, trim: true },
     movmentType: { type: String, enum: ["automatic", "quartz"] },
     productClass: { type: String },
-    countInStock: { type: Number, required: true, default: 0, min: 0 },
+    countInStock: { type: Number, required: true, default: 0 },
     img: { type: String, required: true },
     waterResistance: { type: Boolean, default: false },
     caseShape: { type: String, trim: true },
