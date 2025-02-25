@@ -623,26 +623,60 @@ const addToCart = async (req: Request, res: Response) => {
 //  checkout
 
 const createCheckout = async (req: Request, res: Response) => {
-  const { userId, paymentMethod, shippingAddress, couponCode } = req.body;
+  const { userId, paymentMethod, shippingAddress, couponCode, cart } = req.body;
 
   try {
     // Validate required fields
-    if (!userId || !paymentMethod || !shippingAddress) {
+    if (!paymentMethod || !shippingAddress || !cart) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Fetch the user's cart
-    const userCart = await Cart.findOne({ user: userId }).populate(
-      "products.product"
-    );
-    if (!userCart || userCart.products.length === 0) {
-      return res.status(400).json({ error: "Cart is empty" });
-    }
+    // console.log("Cart from request body:", cart); // Log the cart for debugging
 
-    // Calculate the total price based on the cart items
-    const totalPrice = userCart.products.reduce((sum: number, item: any) => {
-      return sum + item.product.price * item.quantity;
-    }, 0);
+    let userCart;
+    let totalPrice;
+
+    if (!userId) {
+      // If userId is not provided, use the cart from the request body
+      userCart = cart;
+
+      // Validate that each item in the cart has a `productId` and `quantity`
+      const isValidCart = userCart.every(
+        (item: any) => item.product._id && item.quantity
+      );
+      if (!isValidCart) {
+        return res.status(400).json({ error: "Invalid cart structure" });
+      }
+
+      // Fetch product details for each item in the cart
+      const productIds = await userCart.map((item: any) => item.product._id);
+
+      const products = await Product.find({ _id: { $in: productIds } });
+
+      // Calculate the total price based on the cart items and fetched product prices
+      totalPrice = userCart.reduce((sum: number, item: any) => {
+        const product = products.find(
+          (p: any) => p._id.toString() === item?.product._id?.toString()
+        );
+        if (!product) {
+          throw new Error(`Product with ID ${item.productId} not found`);
+        }
+        return sum + product.price * item.quantity;
+      }, 0);
+    } else {
+      // Fetch the user's cart from the database
+      userCart = await Cart.findOne({ user: userId }).populate(
+        "products.product"
+      );
+      if (!userCart || userCart.products.length === 0) {
+        return res.status(400).json({ error: "Cart is empty" });
+      }
+
+      // Calculate the total price based on the cart items
+      totalPrice = userCart.products.reduce((sum: number, item: any) => {
+        return sum + item.product.price * item.quantity;
+      }, 0);
+    }
 
     // Initialize the final total price
     let finalTotalPrice = totalPrice;
@@ -675,12 +709,19 @@ const createCheckout = async (req: Request, res: Response) => {
     }
 
     // Extract products from the cart
-    const products: any = userCart.products.map((item: any) => ({
-      productId: item.product._id,
-      name: item.product.name,
-      quantity: item.quantity,
-      price: item.product.price, // Assuming the product schema has a 'price' field
-    }));
+    const products: any = userId
+      ? userCart.products.map((item: any) => ({
+          productId: item.product._id,
+          name: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price,
+        }))
+      : userCart.map((item: any) => ({
+          productId: item.product._id,
+          name: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price,
+        }));
 
     // Create the checkout object
     const newCheckoutData: any = {
@@ -699,16 +740,26 @@ const createCheckout = async (req: Request, res: Response) => {
     const savedCheckout = await newCheckout.save();
 
     // Lower the product quantities
-    for (const item of userCart.products) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        product.countInStock -= item.quantity;
-        await product.save();
+    if (userId) {
+      for (const item of userCart.products) {
+        const product = await Product.findById(item.product);
+        if (product) {
+          product.countInStock -= item.quantity;
+          await product.save();
+        }
+      }
+
+      // Clear the user's cart if userId is provided
+      await Cart.findOneAndUpdate({ user: userId }, { products: [] });
+    } else {
+      for (const item of userCart) {
+        const product = await Product.findById(item.productId);
+        if (product) {
+          product.countInStock -= item.quantity;
+          await product.save();
+        }
       }
     }
-
-    // Clear the user's cart
-    await Cart.findOneAndUpdate({ user: userId }, { products: [] });
 
     res.status(201).json({
       message: "Checkout completed successfully",
