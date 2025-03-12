@@ -52,7 +52,8 @@ import {
   orderStatusUpdate,
   addCouponCode,
   disableOrEnableCouponCode,
-  checkCouponCode, // Add this
+  checkCouponCode,
+  validateCart, // Add this
 } from "../controllers/productController";
 import {
   authMiddleware,
@@ -84,6 +85,7 @@ router.route("/cart/add/one").post(addProductToCart);
 router.route("/cart/all/:id").post(addToCartAll);
 // checkouts
 router.route("/checkout").post(createCheckout);
+router.route("/validate/cart").post(validateCart);
 router.route("/orders/all").get(authMiddleware, getAllOrders);
 router.route("/orders/:id").put(authMiddleware, orderStatusUpdate);
 // Favorites

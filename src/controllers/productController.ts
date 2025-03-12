@@ -621,9 +621,53 @@ const addToCart = async (req: Request, res: Response) => {
   }
 };
 //  checkout
+const validateCart = async (req: Request, res: Response) => {
+  // validate Cart without authorization
+  const { cart } = req.body;
+  // console.log(cart);
 
+  if (!Array.isArray(cart)) {
+    return res.status(400).json({ error: "Invalid cart format" });
+  }
+  // Validate that each item in the cart has a `productId` and `quantity`
+  const isValidCart = cart.every(
+    (item: any) => item.product._id && item.quantity
+  );
+  if (!isValidCart) {
+    return res.status(400).json({ error: "Invalid cart structure" });
+  }
+
+  // Fetch product details for each item in the cart
+  const productIds = await cart.map((item: any) => item.product._id);
+
+  const products = await Product.find({ _id: { $in: productIds } });
+
+  // Calculate the total price based on the cart items and fetched product prices
+  const totalPrice = cart.reduce((sum: number, item: any) => {
+    const product = products.find(
+      (p: any) => p._id.toString() === item.product._id.toString()
+    );
+    if (!product) {
+      throw new Error(`Product with ID ${item.product._id} not found`);
+    }
+    return sum + product.price * item.quantity;
+  }, 0);
+  // Apply coupon code if provided
+  const { couponCode } = req.body;
+  let finalTotalPrice = totalPrice;
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) {
+      return res.status(400).json({ error: "Invalid coupon code" });
+    }
+    finalTotalPrice = totalPrice - (totalPrice * coupon.discount) / 100;
+  }
+  res.status(200).json({ totalPrice, finalTotalPrice });
+};
 const createCheckout = async (req: Request, res: Response) => {
-  const { userId, paymentMethod, shippingAddress, couponCode, cart } = req.body;
+  const { userId, paymentMethod, shippingAddress, couponCode, cart, orderId } =
+    req.body;
+  console.log(cart);
 
   try {
     // Validate required fields
@@ -729,6 +773,7 @@ const createCheckout = async (req: Request, res: Response) => {
       products,
       totalPrice: finalTotalPrice + 100, // Use the discounted total price
       paymentMethod,
+      orderId,
       shippingAddress,
       couponCode: coupon?._id || null, // Include the coupon code in the checkout
     };
@@ -1076,6 +1121,7 @@ export {
   getFavoriteProducts,
   isFavorite,
   RemoveFromFavorite,
+  validateCart,
   createCheckout,
   getAllOrders,
   orderStatusUpdate,
