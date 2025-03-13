@@ -53,7 +53,8 @@ import {
   addCouponCode,
   disableOrEnableCouponCode,
   checkCouponCode,
-  validateCart, // Add this
+  validateCart,
+  paymobCheckout, // Add this
 } from "../controllers/productController";
 import {
   authMiddleware,
@@ -85,6 +86,7 @@ router.route("/cart/add/one").post(addProductToCart);
 router.route("/cart/all/:id").post(addToCartAll);
 // checkouts
 router.route("/checkout").post(createCheckout);
+router.route("/paymobCheckout").post(paymobCheckout);
 router.route("/validate/cart").post(validateCart);
 router.route("/orders/all").get(authMiddleware, getAllOrders);
 router.route("/orders/:id").put(authMiddleware, orderStatusUpdate);

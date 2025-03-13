@@ -664,6 +664,161 @@ const validateCart = async (req: Request, res: Response) => {
   }
   res.status(200).json({ totalPrice, finalTotalPrice });
 };
+const paymobCheckout = async (req: Request, res: Response) => {
+  const { userId, paymentMethod, shippingAddress, couponCode, cart, orderId } =
+    req.body;
+  try {
+    const checkouts = await CheckOuts.find({ orderId });
+    if (checkouts.length > 0) {
+      return res.status(400).json({ error: "Order ID already exists" });
+    }
+    // Validate required fields
+    if (!paymentMethod || !shippingAddress || !cart) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // console.log("Cart from request body:", cart); // Log the cart for debugging
+
+    let userCart;
+    let totalPrice;
+
+    if (!userId) {
+      // If userId is not provided, use the cart from the request body
+      userCart = cart;
+
+      // Validate that each item in the cart has a `productId` and `quantity`
+      const isValidCart = userCart.every(
+        (item: any) => item.description && item.quantity
+      );
+      if (!isValidCart) {
+        return res.status(400).json({ error: "Invalid cart structure" });
+      }
+
+      // Fetch product details for each item in the cart
+      const productIds = await userCart.map((item: any) => item.description);
+
+      const products = await Product.find({ _id: { $in: productIds } });
+
+      // Calculate the total price based on the cart items and fetched product prices
+      totalPrice = userCart.reduce((sum: number, item: any) => {
+        const product = products.find(
+          (p: any) => p._id.toString() === item?.description?.toString()
+        );
+        if (!product) {
+          throw new Error(`Product with ID ${item.productId} not found`);
+        }
+        return sum + product.price * item.quantity;
+      }, 0);
+    } else {
+      // Fetch the user's cart from the database
+      userCart = await Cart.findOne({ user: userId }).populate(
+        "products.product"
+      );
+      if (!userCart || userCart.products.length === 0) {
+        return res.status(400).json({ error: "Cart is empty" });
+      }
+
+      // Calculate the total price based on the cart items
+      totalPrice = userCart.products.reduce((sum: number, item: any) => {
+        return sum + item.product.price * item.quantity;
+      }, 0);
+    }
+
+    // Initialize the final total price
+    let finalTotalPrice = totalPrice;
+
+    // Validate and apply the coupon if provided
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (couponCode) {
+      if (!coupon) {
+        return res.status(404).json({ error: "Coupon not found" });
+      }
+
+      if (!coupon.valid) {
+        return res.status(400).json({ error: "Coupon is not valid" });
+      }
+
+      if (coupon.usedCount >= coupon.maxUsage) {
+        return res.status(400).json({ error: "Coupon usage limit exceeded" });
+      }
+
+      if (coupon.expiresAt && coupon.expiresAt < new Date()) {
+        return res.status(400).json({ error: "Coupon has expired" });
+      }
+
+      // Apply the discount to the total price
+      finalTotalPrice = totalPrice - (totalPrice * coupon.discount) / 100;
+
+      // Increment the coupon's used count
+      coupon.usedCount += 1;
+      await coupon.save();
+    }
+
+    // Extract products from the cart
+    const products: any = userId
+      ? userCart.products.map((item: any) => ({
+          productId: item.description,
+          name: item.name,
+          quantity: item.quantity,
+          image: item.image,
+          price: item.amount,
+        }))
+      : userCart.map((item: any) => ({
+          productId: item.description,
+          name: item.name,
+          quantity: item.quantity,
+          image: item.image,
+          price: item.amount,
+        }));
+
+    // Create the checkout object
+    const newCheckoutData: any = {
+      userId,
+      products,
+      totalPrice: finalTotalPrice + 100, // Use the discounted total price
+      paymentMethod: "Pay with Card",
+      orderId,
+      shippingAddress,
+      couponCode: coupon?._id || null, // Include the coupon code in the checkout
+    };
+
+    // Create a new checkout instance
+    const newCheckout = new CheckOuts(newCheckoutData);
+
+    // Save the checkout to the database
+    const savedCheckout = await newCheckout.save();
+
+    // Lower the product quantities
+    if (userId) {
+      for (const item of userCart.products) {
+        const product = await Product.findById(item.product);
+        if (product) {
+          product.countInStock -= item.quantity;
+          await product.save();
+        }
+      }
+
+      // Clear the user's cart if userId is provided
+      await Cart.findOneAndUpdate({ user: userId }, { products: [] });
+    } else {
+      for (const item of userCart) {
+        const product = await Product.findById(item.productId);
+        if (product) {
+          product.countInStock -= item.quantity;
+          await product.save();
+        }
+      }
+    }
+
+    res.status(201).json({
+      message: "Checkout completed successfully",
+      checkout: savedCheckout,
+    });
+  } catch (error) {
+    console.error("Error creating checkout:", error);
+    res.status(500).json({ error: "Server error during checkout" });
+  }
+};
 const createCheckout = async (req: Request, res: Response) => {
   const { userId, paymentMethod, shippingAddress, couponCode, cart, orderId } =
     req.body;
@@ -757,12 +912,14 @@ const createCheckout = async (req: Request, res: Response) => {
       ? userCart.products.map((item: any) => ({
           productId: item.product._id,
           name: item.product.name,
+          image: item.product.img,
           quantity: item.quantity,
           price: item.product.price,
         }))
       : userCart.map((item: any) => ({
           productId: item.product._id,
           name: item.product.name,
+          image: item.product.img,
           quantity: item.quantity,
           price: item.product.price,
         }));
@@ -1122,6 +1279,7 @@ export {
   isFavorite,
   RemoveFromFavorite,
   validateCart,
+  paymobCheckout,
   createCheckout,
   getAllOrders,
   orderStatusUpdate,

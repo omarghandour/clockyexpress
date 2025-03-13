@@ -8,6 +8,7 @@ interface ICheckout extends Document {
     productId: string;
     name: string;
     price: number;
+    image: string;
     quantity: number;
   }[];
   totalPrice: number;
@@ -24,6 +25,7 @@ interface ICheckout extends Document {
     country: string;
     phone: string;
   };
+  paymentStatus: string;
   orderId?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -40,6 +42,10 @@ const CheckoutSchema: Schema = new Schema(
         productId: {
           type: String,
           ref: "Product",
+          required: true,
+        },
+        image: {
+          type: String,
           required: true,
         },
         name: { type: String, required: true },
@@ -68,6 +74,10 @@ const CheckoutSchema: Schema = new Schema(
       required: false,
     },
     orderId: {
+      type: String,
+      required: false,
+    },
+    paymentStatus: {
       type: String,
       required: false,
     },
